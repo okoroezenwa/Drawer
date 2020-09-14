@@ -149,7 +149,7 @@ class PresentationInteractionController: UIPercentDrivenInteractiveTransition {
                 
                 interactionInProgress = false
                 
-                if !(gr is UIScreenEdgePanGestureRecognizer), let _ = (viewController as? Scrollable)?.refreshControl {
+                if !(gr is UIScreenEdgePanGestureRecognizer), let vc = viewController as? Scrollable, let _ = vc.refreshControl, vc.canBeginDismissal(with: gr) {
                     
                     shouldCompleteTransition = translation.y > 0 && velocity.y > 1750
                     
