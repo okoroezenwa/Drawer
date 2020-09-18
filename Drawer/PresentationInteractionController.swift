@@ -45,7 +45,12 @@ class PresentationInteractionController: UIPercentDrivenInteractiveTransition {
         let translation = gr.translation(in: gr.view)
         let velocity = gr.velocity(in: gr.view)
         let initialProgress = translation.y / (viewController.view.bounds.height - 20)
-        let progress = min(max(initialProgress, 0), 1)
+        let progress: CGFloat = {
+            
+            if !(gr is UIScreenEdgePanGestureRecognizer), let vc = viewController as? Scrollable, let _ = vc.scroller, vc.scrollDirectionMatchesDismissal(via: gr), vc.refreshControl != nil { return 0 }
+            
+            return min(max(initialProgress, 0), 1)
+        }()
         
         switch gr.state {
             
@@ -69,8 +74,6 @@ class PresentationInteractionController: UIPercentDrivenInteractiveTransition {
                         
                         if !(gr is UIScreenEdgePanGestureRecognizer), let vc = viewController as? Scrollable, let offset = vc.scroller?.contentOffset.y {
                             
-                            scrollBeganFromScroller = !vc.scrollerDoesNotContainTouch(from: gr)
-                            vc.scroller?.bounces = false
                             vc.currentOffset = max(offset, -84)
                             vc.scroller?.contentOffset.y = vc.currentOffset
                         }
@@ -118,12 +121,12 @@ class PresentationInteractionController: UIPercentDrivenInteractiveTransition {
                     
                     if vc.scrollDirectionMatchesDismissal(via: gr) {
                         
-                        if scroller.bounces {
+                        if scroller.bounces, vc.refreshControl == nil {
                             
                             scroller.bounces = false
                         }
                         
-                        vc.scroller?.contentOffset.y = vc.currentOffset
+//                        vc.scroller?.contentOffset.y = vc.currentOffset
                     
                     } else {
                         
@@ -261,17 +264,18 @@ extension PresentationInteractionController: UIGestureRecognizerDelegate {
         
         if let gr = gestureRecognizer as? UIPanGestureRecognizer, !(gr is UIScreenEdgePanGestureRecognizer), let vc = viewController as? Scrollable {
             
-            if vc.scrollerDoesNotContainTouch(from: gr), let offset = vc.scroller?.contentOffset.y {
-
-                scrollBeganFromScroller = !vc.scrollerDoesNotContainTouch(from: gr)
+            scrollBeganFromScroller = !vc.scrollerDoesNotContainTouch(from: gr)
+            
+            if vc.refreshControl == nil {
+            
                 vc.scroller?.bounces = false
+            }
+            
+            if vc.scrollerDoesNotContainTouch(from: gr), let offset = vc.scroller?.contentOffset.y {
+                
                 vc.currentOffset = max(offset, -84)
                 vc.scroller?.contentOffset.y = vc.currentOffset
-            
-            }/* else if vc.refreshControl != nil, !vc.scrollerDoesNotContainTouch(from: gr) {
-                
-                return false
-            }*/
+            }
             
             return true
         }
