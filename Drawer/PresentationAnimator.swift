@@ -61,7 +61,7 @@ class PresentationAnimator: NSObject, UIViewControllerAnimatedTransitioning {
         
         if transitionContext.isInteractive {
             
-            UIView.animate(withDuration: duration, delay: 0, options: [.curveLinear, .allowUserInteraction], animations: animations, completion: completion)
+            UIView.animate(withDuration: duration, delay: 0, options: [.curveLinear], animations: animations, completion: completion)
         
         } else {
             

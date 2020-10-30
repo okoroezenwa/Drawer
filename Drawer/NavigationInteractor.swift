@@ -8,7 +8,7 @@
 
 import UIKit
 
-class NavigationInteractionController: UIPercentDrivenInteractiveTransition {
+class NavigationInteractor: UIPercentDrivenInteractiveTransition {
 
     @objc var interactionInProgress = false
     fileprivate var shouldCompleteTransition = false
@@ -99,7 +99,7 @@ class NavigationInteractionController: UIPercentDrivenInteractiveTransition {
     }
 }
 
-extension NavigationInteractionController: UIGestureRecognizerDelegate {
+extension NavigationInteractor: UIGestureRecognizerDelegate {
     
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         

@@ -38,13 +38,13 @@ class PresentationController: UIPresentationController {
         return view
     }()
     
-    var snapshot: UIView? {
-        
-        didSet {
-            
-            oldValue?.removeFromSuperview()
-        }
-    }
+//    var snapshot: UIView? {
+//
+//        didSet {
+//
+//            oldValue?.removeFromSuperview()
+//        }
+//    }
     
     lazy var presenter = previousScrollableViewController(from: presentingViewController) ?? root
     lazy var grandPresenter = (previousScrollableViewController(from: presenter?.presentingViewController) ?? root).value(if: { $0 != presenter })
@@ -109,7 +109,7 @@ class PresentationController: UIPresentationController {
             
             self.dimmingView.alpha = 1.0
             /*snapshot*/presenter.view.transform = self.transform(for: presenter, completed: true)
-            
+            #warning("Issues on iOS 14")
             if #available(iOS 11, *) {
                 
                 /*snapshot*/presenter.view.layer.cornerRadius = cornerRadius
@@ -139,7 +139,7 @@ class PresentationController: UIPresentationController {
         }
         
 //        presenter.view.isHidden = false
-        snapshot = nil
+//        snapshot = nil
     }
     
     override func dismissalTransitionWillBegin() {
@@ -263,7 +263,6 @@ extension CALayer {
     
     func animate(_ value: String, from start: Any?, to end: Any?, duration: TimeInterval, timingFunctionName: CAMediaTimingFunctionName) {
         
-//        CATransaction.begin()
         let animation = CABasicAnimation(keyPath: value)
         animation.duration = duration
         animation.fromValue = start
@@ -271,7 +270,6 @@ extension CALayer {
         animation.timingFunction = .init(name: timingFunctionName)
         animation.fillMode = .forwards
         animation.isRemovedOnCompletion = false
-//        CATransaction.setCompletionBlock({ self.setValue(end, forKeyPath: value) })
         
         add(animation, forKey: value)
     }

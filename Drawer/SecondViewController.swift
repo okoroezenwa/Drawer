@@ -53,9 +53,9 @@ class SecondViewController: UIViewController, Scrollable {
     
     // MARK: - Presentation Variables
     
-    lazy var presenter = PresentationManager(interactor: PresentationInteractionController())
+    lazy var presenter = PresentationManager(interactor: PresentationInteractor())
     
-    let navigationPresenter = NavigationAnimationController()
+    let navigationPresenter = NavigationAnimator()
     
     override var modalPresentationStyle: UIModalPresentationStyle {
         
@@ -84,14 +84,9 @@ class SecondViewController: UIViewController, Scrollable {
     
     @IBAction func unwind(_ segue: UIStoryboardSegue) { }
     
-    override func canPerformUnwindSegueAction(_ action: Selector, from fromViewController: UIViewController, sender: Any?) -> Bool {
-        
-        presentingViewController?.presentingViewController == nil && topViewController != self
-    }
-    
     func scrollerDoesNotContainTouch(from gr: UIPanGestureRecognizer) -> Bool {
         
-        navigationBar.frame.contains(gr.location(in: view))
+        return navigationBar.frame.contains(gr.location(in: view))
     }
     
     func scrollDirectionMatchesDismissal(via gr: UIPanGestureRecognizer) -> Bool {
@@ -121,6 +116,17 @@ class SecondViewController: UIViewController, Scrollable {
             navigationController.delegate = navigationPresenter
             navigationPresenter.interactor.add(to: navigationController)
         }
+    }
+    
+    override func canPerformUnwindSegueAction(_ action: Selector, from fromViewController: UIViewController, withSender sender: Any) -> Bool {
+        
+        return presentingViewController?.presentingViewController == nil && topViewController != self
+    }
+    
+    @available(iOS 13, *)
+    override func canPerformUnwindSegueAction(_ action: Selector, from fromViewController: UIViewController, sender: Any?) -> Bool {
+        
+        return presentingViewController?.presentingViewController == nil && topViewController != self
     }
 }
 

@@ -8,7 +8,7 @@
 
 import UIKit
 
-class PresentationInteractionController: UIPercentDrivenInteractiveTransition {
+class PresentationInteractor: UIPercentDrivenInteractiveTransition {
 
     @objc var interactionInProgress = false
     fileprivate var shouldCompleteTransition = false
@@ -47,7 +47,7 @@ class PresentationInteractionController: UIPercentDrivenInteractiveTransition {
         let initialProgress = translation.y / (viewController.view.bounds.height - 20)
         let progress: CGFloat = {
             
-            if !(gr is UIScreenEdgePanGestureRecognizer), let vc = viewController as? Scrollable, let _ = vc.scroller, vc.scrollDirectionMatchesDismissal(via: gr), vc.refreshControl != nil { return 0 }
+            if !(gr is UIScreenEdgePanGestureRecognizer), let vc = viewController as? Scrollable, let _ = vc.scroller, vc.scrollDirectionMatchesDismissal(via: gr), vc.refreshControl != nil, scrollBeganFromScroller { return 0 }
             
             return min(max(initialProgress, 0), 1)
         }()
@@ -97,6 +97,11 @@ class PresentationInteractionController: UIPercentDrivenInteractiveTransition {
                 if initialProgress < 0 {
                     
                     if !(gr is UIScreenEdgePanGestureRecognizer), scrollBeganFromScroller { } else {
+                        
+                        if let vc = viewController as? Scrollable, let scroller = vc.scroller {
+                            
+                            scroller.contentOffset.y = scroller.contentOffset.y
+                        }
                         
                         let location = gr.location(in: appDelegate.window).y
                         let progress = (startPoint - location) / startPoint
@@ -152,7 +157,7 @@ class PresentationInteractionController: UIPercentDrivenInteractiveTransition {
                 
                 interactionInProgress = false
                 
-                if !(gr is UIScreenEdgePanGestureRecognizer), let vc = viewController as? Scrollable, let _ = vc.refreshControl, vc.canBeginDismissal(with: gr) {
+                if !(gr is UIScreenEdgePanGestureRecognizer), let vc = viewController as? Scrollable, let _ = vc.refreshControl, vc.canBeginDismissal(with: gr), scrollBeganFromScroller {
                     
                     shouldCompleteTransition = translation.y > 0 && velocity.y > 1750
                     
@@ -181,6 +186,8 @@ class PresentationInteractionController: UIPercentDrivenInteractiveTransition {
                     completionSpeed = percentComplete
                     cancel()
                 }
+                
+                if let vc = viewController as? Scrollable { vc.scroller?.isScrollEnabled = true } // seems to take care of issue where scrolling up at some in-between point of the header and scroll view causes both to perform their respective actions at once. Issue also seemed to have an effect on the offset that results in a dismissal later on
                 
                 if #available(iOS 11, *) { } else { animateRadius(shouldCompleteTransition: shouldCompleteTransition) }
                 updateStatusBar(shouldCompleteTransition: shouldCompleteTransition)
@@ -219,7 +226,7 @@ class PresentationInteractionController: UIPercentDrivenInteractiveTransition {
     }
 }
 
-extension PresentationInteractionController: UIGestureRecognizerDelegate {
+extension PresentationInteractor: UIGestureRecognizerDelegate {
     
     func canBeginDismissal(via gr: UIPanGestureRecognizer) -> Bool {
         
@@ -272,7 +279,7 @@ extension PresentationInteractionController: UIGestureRecognizerDelegate {
             }
             
             if vc.scrollerDoesNotContainTouch(from: gr), let offset = vc.scroller?.contentOffset.y {
-                
+                vc.scroller?.isScrollEnabled = false
                 vc.currentOffset = max(offset, -84)
                 vc.scroller?.contentOffset.y = vc.currentOffset
             }

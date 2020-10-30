@@ -10,17 +10,17 @@ import UIKit
 
 enum AnimationDirection { case forward, reverse }
 
-class NavigationAnimationController: NSObject, UIViewControllerAnimatedTransitioning, UIViewControllerTransitioningDelegate {
+class NavigationAnimator: NSObject, UIViewControllerAnimatedTransitioning, UIViewControllerTransitioningDelegate {
     
     var direction: AnimationDirection
-    @objc var interactor: NavigationInteractionController
+    @objc var interactor: NavigationInteractor
     var animationInProgress: Bool
     var disregardViewLayoutDuringKeyboardPresentation = false
 
     override init() {
         
         direction = .forward
-        interactor = NavigationInteractionController()
+        interactor = NavigationInteractor()
         animationInProgress = false
         
         super.init()
@@ -103,7 +103,7 @@ class NavigationAnimationController: NSObject, UIViewControllerAnimatedTransitio
     }
 }
 
-extension NavigationAnimationController: UINavigationControllerDelegate {
+extension NavigationAnimator: UINavigationControllerDelegate {
     
     func navigationController(_ navigationController: UINavigationController, interactionControllerFor animationController: UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning? {
         

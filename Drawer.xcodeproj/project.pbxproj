@@ -7,8 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		BE13C7DC24FCF14600547AD6 /* NavigationAnimationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE13C7DB24FCF14500547AD6 /* NavigationAnimationController.swift */; };
-		BE13C7DE24FCF4CA00547AD6 /* NavigationInteractionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE13C7DD24FCF4CA00547AD6 /* NavigationInteractionController.swift */; };
+		BE13C7DC24FCF14600547AD6 /* NavigationAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE13C7DB24FCF14500547AD6 /* NavigationAnimator.swift */; };
+		BE13C7DE24FCF4CA00547AD6 /* NavigationInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE13C7DD24FCF4CA00547AD6 /* NavigationInteractor.swift */; };
 		BE96E2B3241E26AD0096CEE9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE96E2B2241E26AD0096CEE9 /* AppDelegate.swift */; };
 		BE96E2B5241E26AD0096CEE9 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE96E2B4241E26AD0096CEE9 /* SceneDelegate.swift */; };
 		BE96E2B7241E26AD0096CEE9 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE96E2B6241E26AD0096CEE9 /* ViewController.swift */; };
@@ -19,13 +19,13 @@
 		BEF55AEE24B7791F005AE484 /* PresentationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEF55AED24B7791E005AE484 /* PresentationController.swift */; };
 		BEF55AF024B7885F005AE484 /* PresentationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEF55AEF24B7885F005AE484 /* PresentationManager.swift */; };
 		BEF55AF224B7AAA9005AE484 /* PresentationAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEF55AF124B7AAA9005AE484 /* PresentationAnimator.swift */; };
-		BEF55AF424B87F3E005AE484 /* PresentationInteractionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEF55AF324B87F3E005AE484 /* PresentationInteractionController.swift */; };
+		BEF55AF424B87F3E005AE484 /* PresentationInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEF55AF324B87F3E005AE484 /* PresentationInteractor.swift */; };
 		BEF55AF624BA2892005AE484 /* TableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEF55AF524BA2892005AE484 /* TableViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		BE13C7DB24FCF14500547AD6 /* NavigationAnimationController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NavigationAnimationController.swift; sourceTree = "<group>"; };
-		BE13C7DD24FCF4CA00547AD6 /* NavigationInteractionController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NavigationInteractionController.swift; sourceTree = "<group>"; };
+		BE13C7DB24FCF14500547AD6 /* NavigationAnimator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NavigationAnimator.swift; sourceTree = "<group>"; };
+		BE13C7DD24FCF4CA00547AD6 /* NavigationInteractor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NavigationInteractor.swift; sourceTree = "<group>"; };
 		BE96E2AF241E26AD0096CEE9 /* Drawer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Drawer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BE96E2B2241E26AD0096CEE9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		BE96E2B4241E26AD0096CEE9 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -38,7 +38,7 @@
 		BEF55AED24B7791E005AE484 /* PresentationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentationController.swift; sourceTree = "<group>"; };
 		BEF55AEF24B7885F005AE484 /* PresentationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentationManager.swift; sourceTree = "<group>"; };
 		BEF55AF124B7AAA9005AE484 /* PresentationAnimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentationAnimator.swift; sourceTree = "<group>"; };
-		BEF55AF324B87F3E005AE484 /* PresentationInteractionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentationInteractionController.swift; sourceTree = "<group>"; };
+		BEF55AF324B87F3E005AE484 /* PresentationInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentationInteractor.swift; sourceTree = "<group>"; };
 		BEF55AF524BA2892005AE484 /* TableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -76,9 +76,9 @@
 				BE96E2B4241E26AD0096CEE9 /* SceneDelegate.swift */,
 				BEF55AED24B7791E005AE484 /* PresentationController.swift */,
 				BEF55AF124B7AAA9005AE484 /* PresentationAnimator.swift */,
-				BEF55AF324B87F3E005AE484 /* PresentationInteractionController.swift */,
-				BE13C7DB24FCF14500547AD6 /* NavigationAnimationController.swift */,
-				BE13C7DD24FCF4CA00547AD6 /* NavigationInteractionController.swift */,
+				BEF55AF324B87F3E005AE484 /* PresentationInteractor.swift */,
+				BE13C7DB24FCF14500547AD6 /* NavigationAnimator.swift */,
+				BE13C7DD24FCF4CA00547AD6 /* NavigationInteractor.swift */,
 				BEF55AEF24B7885F005AE484 /* PresentationManager.swift */,
 				BE96E2B8241E26AD0096CEE9 /* Main.storyboard */,
 				BE96E2B6241E26AD0096CEE9 /* ViewController.swift */,
@@ -118,7 +118,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1120;
-				LastUpgradeCheck = 1120;
+				LastUpgradeCheck = 1210;
 				ORGANIZATIONNAME = "Ezenwa Okoro";
 				TargetAttributes = {
 					BE96E2AE241E26AD0096CEE9 = {
@@ -164,11 +164,11 @@
 			files = (
 				BEF55AEC24B75A33005AE484 /* SecondViewController.swift in Sources */,
 				BEF55AF024B7885F005AE484 /* PresentationManager.swift in Sources */,
-				BE13C7DC24FCF14600547AD6 /* NavigationAnimationController.swift in Sources */,
-				BEF55AF424B87F3E005AE484 /* PresentationInteractionController.swift in Sources */,
+				BE13C7DC24FCF14600547AD6 /* NavigationAnimator.swift in Sources */,
+				BEF55AF424B87F3E005AE484 /* PresentationInteractor.swift in Sources */,
 				BE96E2B7241E26AD0096CEE9 /* ViewController.swift in Sources */,
 				BE96E2B3241E26AD0096CEE9 /* AppDelegate.swift in Sources */,
-				BE13C7DE24FCF4CA00547AD6 /* NavigationInteractionController.swift in Sources */,
+				BE13C7DE24FCF4CA00547AD6 /* NavigationInteractor.swift in Sources */,
 				BE96E2B5241E26AD0096CEE9 /* SceneDelegate.swift in Sources */,
 				BEF55AEE24B7791F005AE484 /* PresentationController.swift in Sources */,
 				BEF55AF624BA2892005AE484 /* TableViewController.swift in Sources */,
@@ -224,6 +224,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -248,7 +249,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -284,6 +285,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -302,7 +304,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;

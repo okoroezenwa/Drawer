@@ -10,9 +10,9 @@ import UIKit
 
 class PresentationManager: NSObject, UIViewControllerTransitioningDelegate {
     
-    let interactor: PresentationInteractionController
+    let interactor: PresentationInteractor
     
-    init(interactor: PresentationInteractionController) {
+    init(interactor: PresentationInteractor) {
         
         self.interactor = interactor
         
