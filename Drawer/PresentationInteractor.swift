@@ -105,7 +105,15 @@ class PresentationInteractor: UIPercentDrivenInteractiveTransition {
                         
                         let location = gr.location(in: appDelegate.window).y
                         let progress = (startPoint - location) / startPoint
-                        viewController.view.transform = .init(translationX: 0, y: -progress * (progress - 2) * -20)
+                        
+                        if useFrames, let frame = self.viewController?.presentationController?.frameOfPresentedViewInContainerView {
+                            
+                            viewController.view.frame.origin.y = frame.origin.y + (-progress * (progress - 2) * -20)
+                            
+                        } else {
+                        
+                            viewController.view.transform = .init(translationX: 0, y: -progress * (progress - 2) * -20)
+                        }
                     }
                     
                 } else {
@@ -207,7 +215,17 @@ class PresentationInteractor: UIPercentDrivenInteractiveTransition {
         
         guard initialProgress < 0 else { return }
             
-        UIView.animate(withDuration: 0.65, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 0, options: [.curveLinear, .allowUserInteraction], animations: { self.viewController?.view.transform = .identity })
+        UIView.animate(withDuration: 0.65, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 0, options: [.curveLinear, .allowUserInteraction], animations: {
+                        
+            if useFrames, let frame = self.viewController?.presentationController?.frameOfPresentedViewInContainerView {
+                
+                self.viewController?.view.frame = frame
+                
+            } else {
+                        
+                self.viewController?.view.transform = .identity
+            }
+        })
     }
     
     func animateRadius(shouldCompleteTransition: Bool) {

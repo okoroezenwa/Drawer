@@ -24,10 +24,18 @@ var useRefreshControl: Bool {
     set { UserDefaults.standard.set(newValue, forKey: "useRefreshControl") }
 }
 
+var useFrames: Bool {
+    
+    get { UserDefaults.standard.bool(forKey: "useFrames") }
+    
+    set { UserDefaults.standard.set(newValue, forKey: "useFrames") }
+}
+
 class ViewController: UIViewController {
     
     @IBOutlet var presentSwitch: UISwitch!
     @IBOutlet var refreshSwitch: UISwitch!
+    @IBOutlet var framesSwitch: UISwitch!
     @IBOutlet var titleLabelTopConstraint: NSLayoutConstraint!
     
     var useLightStatusBar = false {
@@ -51,6 +59,9 @@ class ViewController: UIViewController {
         
         refreshSwitch.isOn = useRefreshControl
         refreshSwitch.addTarget(self, action: #selector(toggleSwitches(_:)), for: .valueChanged)
+        
+        framesSwitch.isOn = useFrames
+        framesSwitch.addTarget(self, action: #selector(toggleSwitches(_:)), for: .valueChanged)
     }
     
     @objc func toggleSwitches(_ sender: UISwitch) {
@@ -62,6 +73,10 @@ class ViewController: UIViewController {
         } else if sender == refreshSwitch {
             
             useRefreshControl.toggle()
+        
+        } else if sender == framesSwitch {
+            
+            useFrames.toggle()
         }
     }
     

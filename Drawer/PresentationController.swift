@@ -38,19 +38,11 @@ class PresentationController: UIPresentationController {
         return view
     }()
     
-//    var snapshot: UIView? {
-//
-//        didSet {
-//
-//            oldValue?.removeFromSuperview()
-//        }
-//    }
-    
     lazy var presenter = previousScrollableViewController(from: presentingViewController) ?? root
     lazy var grandPresenter = (previousScrollableViewController(from: presenter?.presentingViewController) ?? root).value(if: { $0 != presenter })
     
     lazy var newOrigin = statusBarHeight + 10
-    var grandParentYTranlation = 10 as CGFloat
+    var grandParentYTranslation = 10 as CGFloat
     
     lazy var statusBarHeight: CGFloat = Drawer.statusBarHeight(from: containerView)
     
@@ -70,18 +62,11 @@ class PresentationController: UIPresentationController {
     
     override func presentationTransitionWillBegin() {
         
-        guard let presenter = presenter/*, let snapshot = presenter.view.snapshotView(afterScreenUpdates: false)*/ else { return }
-        
-//        snapshot.clipsToBounds = true
-//        self.snapshot = snapshot
-//        snapshot.frame = presenter.view.frame
+        guard let presenter = presenter else { return }
         
         containerView?.insertSubview(dimmingView, at: 0)
-//        containerView?.insertSubview(snapshot, at: 0)
         presentedView?.round([.topLeft, .topRight], radius: cornerRadius)
-        
-//        presenter.view.isHidden = true
-        
+
         if let vc = presenter as? ViewController {
             
             vc.useLightStatusBar = true
@@ -101,21 +86,58 @@ class PresentationController: UIPresentationController {
         
             if presenter is ViewController {
             
-                /*snapshot*/presenter.view.layer.animate(#keyPath(CALayer.cornerRadius), from: 0, to: cornerRadius, duration: coordinator.transitionDuration, timingFunctionName: .linear)
+                presenter.view.layer.animate(#keyPath(CALayer.cornerRadius), from: 0, to: cornerRadius, duration: coordinator.transitionDuration, timingFunctionName: .linear)
             }
+        }
+        
+        if #available(iOS 11, *) { } else {
+            
+            coordinator.animateAlongsideTransition(in: presenter.view, animation: { _ in
+                
+                if useFrames {
+                    
+                    presenter.view.frame = self.frame(for: presenter, completed: true)
+                    
+                } else {
+                
+                    presenter.view.transform = self.transform(for: presenter, completed: true)
+                }
+                
+            }, completion: nil)
+            
+            coordinator.animateAlongsideTransition(in: grandPresenter?.view, animation: { _ in
+                
+                if useFrames {
+                    
+                    self.grandPresenter?.view.frame = self.frame(for: self.grandPresenter, completed: true).modifiedBy(x: 0, y: 10)
+                    
+                } else {
+                
+                    self.grandPresenter?.view.transform = self.transform(for: self.grandPresenter, completed: true).translatedBy(x: 0, y: self.grandParentYTranslation)
+                }
+                
+            }, completion: nil)
         }
         
         coordinator.animate(alongsideTransition: { _ in
             
             self.dimmingView.alpha = 1.0
-            /*snapshot*/presenter.view.transform = self.transform(for: presenter, completed: true)
-            #warning("Issues on iOS 14")
+            
             if #available(iOS 11, *) {
                 
-                /*snapshot*/presenter.view.layer.cornerRadius = cornerRadius
+                presenter.view.layer.cornerRadius = cornerRadius
+                
+                if useFrames {
+                
+                    presenter.view.frame = self.frame(for: presenter, completed: true)
+                    self.grandPresenter?.view.frame = self.frame(for: self.grandPresenter, completed: true).modifiedBy(x: 0, y: 10)
+                
+                } else {
+                    
+                    presenter.view.transform = self.transform(for: presenter, completed: true)
+                    self.grandPresenter?.view.transform = self.transform(for: self.grandPresenter, completed: true).translatedBy(x: 0, y: self.grandParentYTranslation)
+                }
             }
-            
-            self.grandPresenter?.view.transform = self.transform(for: self.grandPresenter, completed: true).translatedBy(x: 0, y: self.grandParentYTranlation)
         })
     }
     
@@ -128,8 +150,16 @@ class PresentationController: UIPresentationController {
             numberOfControllers += 1
         }
         
-        presenter.view.transform = transform(for: presenter, completed: completed)
-        grandPresenter?.view.transform = transform(for: grandPresenter, completed: true).translatedBy(x: 0, y: completed ? grandParentYTranlation : 0)
+        if useFrames {
+        
+            presenter.view.frame = completed ? frame(for: presenter, completed: true) : frameOfPresentedViewInContainerView
+            grandPresenter?.view.frame = frame(for: grandPresenter, completed: true).modifiedBy(x: 0, y: completed ? 10 : 0)
+            
+        } else {
+            
+            presenter.view.transform = transform(for: presenter, completed: completed)
+            grandPresenter?.view.transform = transform(for: grandPresenter, completed: true).translatedBy(x: 0, y: completed ? grandParentYTranslation : 0)
+        }
         
         if presenter is ViewController {
         
@@ -137,9 +167,6 @@ class PresentationController: UIPresentationController {
             
             if #available(iOS 11, *) { } else { presenter.view.layer.removeAllAnimations() }
         }
-        
-//        presenter.view.isHidden = false
-//        snapshot = nil
     }
     
     override func dismissalTransitionWillBegin() {
@@ -167,17 +194,54 @@ class PresentationController: UIPresentationController {
             }
         }
         
+        if #available(iOS 11, *) { } else {
+            
+            coordinator.animateAlongsideTransition(in: presenter?.view, animation: { _ in
+                
+                if useFrames {
+                
+                    self.presenter?.view.frame = self.presenter is ViewController ? UIScreen.main.bounds : self.frameOfPresentedViewInContainerView
+                
+                } else {
+                    
+                    self.presenter?.view.transform = .identity
+                }
+                
+            }, completion: nil)
+            
+            coordinator.animateAlongsideTransition(in: grandPresenter?.view, animation: { _ in
+                
+                if useFrames {
+                
+                    self.grandPresenter?.view.frame = self.frame(for: self.grandPresenter, completed: true)
+                
+                } else {
+                    
+                    self.grandPresenter?.view.transform = self.transform(for: self.grandPresenter, completed: true)
+                }
+                
+            }, completion: nil)
+        }
+        
         coordinator.animate(alongsideTransition: { _ in
             
             self.dimmingView.alpha = 0.0
-            self.presenter?.view.transform = .identity
             
             if #available(iOS 11, *) {
                 
                 self.presenter?.view.layer.cornerRadius = 0
+                
+                if useFrames {
+                    
+                    self.presenter?.view.frame = self.presenter is ViewController ? UIScreen.main.bounds : self.frameOfPresentedViewInContainerView
+                    self.grandPresenter?.view.frame = self.frame(for: self.grandPresenter, completed: true)
+                
+                } else {
+                    
+                    self.presenter?.view.transform = .identity
+                    self.grandPresenter?.view.transform = self.transform(for: self.grandPresenter, completed: true)
+                }
             }
-            
-            self.grandPresenter?.view.transform = self.transform(for: self.grandPresenter, completed: true)
         })
     }
     
@@ -190,7 +254,16 @@ class PresentationController: UIPresentationController {
             numberOfControllers -= 1
         }
         
-        grandPresenter?.view.transform = transform(for: grandPresenter, completed: true).translatedBy(x: 0, y: completed ? 0 : grandParentYTranlation)
+        if useFrames {
+            
+            presenter.view.frame = presenter is ViewController ? (completed ? UIScreen.main.bounds : frame(for: presenter, completed: true)) : (completed ? frameOfPresentedViewInContainerView : frame(for: presenter, completed: true))
+            grandPresenter?.view.frame = frame(for: grandPresenter, completed: true).modifiedBy(x: 0, y: completed ? 0 : 10)
+            
+        } else {
+            
+            presenter.view.transform = completed ? .identity : transform(for: presenter, completed: true)
+            grandPresenter?.view.transform = transform(for: grandPresenter, completed: true).translatedBy(x: 0, y: completed ? 0 : grandParentYTranslation)
+        }
         
         if presenter is ViewController {
         
@@ -237,6 +310,15 @@ extension PresentationController {
         }
     }
     
+    func frame(for vc: UIViewController?, completed: Bool) -> CGRect {
+        
+        let ratio = (UIScreen.main.bounds.width - 32) / UIScreen.main.bounds.width
+        let height = frameOfPresentedViewInContainerView.height
+        let newHeight = height * ratio
+        
+        return .init(x: 16, y: statusBarHeight + 10, width: UIScreen.main.bounds.width - 32, height: newHeight)
+    }
+    
     func radius(for state: PresentationAnimator.State, completed: Bool) -> CGFloat {
         
         switch state {
@@ -281,4 +363,24 @@ extension Optional {
         
         condition(self) ? self : nil
     }
+}
+
+extension CGRect {
+    
+    func modifiedBy(width: CGFloat, height: CGFloat) -> CGRect {
+        
+        return CGRect.init(x: origin.x, y: origin.y, width: self.width + width, height: self.height + height)
+    }
+    
+    func modifiedBy(newOrigin: CGPoint = .zero, size: CGSize) -> CGRect {
+        
+        return CGRect.init(x: origin.x + newOrigin.x, y: origin.y + newOrigin.y, width: self.width + size.width, height: self.height + size.height)
+    }
+    
+    func modifiedBy(x: CGFloat, y: CGFloat) -> CGRect {
+        
+        return CGRect.init(x: origin.x + x, y: origin.y + y, width: width, height: height)
+    }
+    
+    var centre: CGPoint { return .init(x: (width / 2) + origin.x, y: (height / 2) + origin.y) }
 }
