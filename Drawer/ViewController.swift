@@ -24,18 +24,18 @@ var useRefreshControl: Bool {
     set { UserDefaults.standard.set(newValue, forKey: "useRefreshControl") }
 }
 
-var useFrames: Bool {
+var use3DTransforms: Bool {
     
-    get { UserDefaults.standard.bool(forKey: "useFrames") }
+    get { UserDefaults.standard.bool(forKey: "use3DTransforms") }
     
-    set { UserDefaults.standard.set(newValue, forKey: "useFrames") }
+    set { UserDefaults.standard.set(newValue, forKey: "use3DTransforms") }
 }
 
 class ViewController: UIViewController {
     
     @IBOutlet var presentSwitch: UISwitch!
     @IBOutlet var refreshSwitch: UISwitch!
-    @IBOutlet var framesSwitch: UISwitch!
+    @IBOutlet var transformSwitch: UISwitch!
     @IBOutlet var titleLabelTopConstraint: NSLayoutConstraint!
     
     var useLightStatusBar = false {
@@ -60,8 +60,8 @@ class ViewController: UIViewController {
         refreshSwitch.isOn = useRefreshControl
         refreshSwitch.addTarget(self, action: #selector(toggleSwitches(_:)), for: .valueChanged)
         
-        framesSwitch.isOn = useFrames
-        framesSwitch.addTarget(self, action: #selector(toggleSwitches(_:)), for: .valueChanged)
+        transformSwitch.isOn = use3DTransforms
+        transformSwitch.addTarget(self, action: #selector(toggleSwitches(_:)), for: .valueChanged)
     }
     
     @objc func toggleSwitches(_ sender: UISwitch) {
@@ -74,9 +74,9 @@ class ViewController: UIViewController {
             
             useRefreshControl.toggle()
         
-        } else if sender == framesSwitch {
+        } else if sender == transformSwitch {
             
-            useFrames.toggle()
+            use3DTransforms.toggle()
         }
     }
     
