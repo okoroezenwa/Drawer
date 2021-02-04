@@ -8,35 +8,14 @@
 
 import UIKit
 
-typealias ScrollableViewController = UIViewController & Scrollable
-
-var presentScrollable: Bool {
-    
-    get { UserDefaults.standard.bool(forKey: "presentScrollable") }
-    
-    set { UserDefaults.standard.set(newValue, forKey: "presentScrollable") }
-}
-
-var useRefreshControl: Bool {
-    
-    get { UserDefaults.standard.bool(forKey: "useRefreshControl") }
-    
-    set { UserDefaults.standard.set(newValue, forKey: "useRefreshControl") }
-}
-
-var use3DTransforms: Bool {
-    
-    get { UserDefaults.standard.bool(forKey: "use3DTransforms") }
-    
-    set { UserDefaults.standard.set(newValue, forKey: "use3DTransforms") }
-}
-
 class ViewController: UIViewController {
     
     @IBOutlet var presentSwitch: UISwitch!
     @IBOutlet var refreshSwitch: UISwitch!
     @IBOutlet var transformSwitch: UISwitch!
     @IBOutlet var titleLabelTopConstraint: NSLayoutConstraint!
+    @IBOutlet var rowStepper: UIStepper!
+    @IBOutlet var rowLabel: UILabel!
     
     var useLightStatusBar = false {
         
@@ -62,6 +41,14 @@ class ViewController: UIViewController {
         
         transformSwitch.isOn = use3DTransforms
         transformSwitch.addTarget(self, action: #selector(toggleSwitches(_:)), for: .valueChanged)
+        
+        rowStepper.value = Double(rowCount)
+        updateLabel()
+    }
+    
+    func updateLabel() {
+        
+        rowLabel.text = "\(rowCount) \(rowCount == 1 ? "Row" : "Rows")"
     }
     
     @objc func toggleSwitches(_ sender: UISwitch) {
@@ -102,6 +89,12 @@ class ViewController: UIViewController {
         present(vc, animated: true, completion: nil)
     }
     
+    @IBAction func changeDefaultRowCount(_ sender: UIStepper) {
+        
+        rowCount = Int(sender.value)
+        updateLabel()
+    }
+    
     override func shouldPerformSegue(withIdentifier identifier: String, sender: Any?) -> Bool {
         
         if identifier == "second", !presentScrollable {
@@ -114,37 +107,3 @@ class ViewController: UIViewController {
         return true
     }
 }
-
-var root: ViewController? { appDelegate.window?.rootViewController as? ViewController }
-
-func previousScrollableViewController(from viewController: UIViewController?) -> ScrollableViewController? {
-    
-    guard viewController != nil else { return nil }
-    
-    if let scrollable = rootOfPresentedViewController(from: viewController) as? ScrollableViewController { return scrollable }
-    
-    return previousScrollableViewController(from: viewController?.presentingViewController)
-}
-
-func rootOfPresentedViewController(from viewController: UIViewController?) -> UIViewController? {
-    
-    if viewController?.parent == nil { return viewController }
-    
-    return rootOfPresentedViewController(from: viewController?.parent)
-}
-
-var topViewController: UIViewController? { return topVC(startingFrom: appDelegate.window?.rootViewController) }
-
-func topVC(startingFrom vc: UIViewController? = topViewController) -> UIViewController? {
-    
-    if let presented = vc?.presentedViewController {
-        
-        return topVC(startingFrom: presented)
-        
-    } else {
-        
-        return vc
-    }
-}
-
-let appDelegate = UIApplication.shared.delegate as! AppDelegate

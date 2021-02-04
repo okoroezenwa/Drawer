@@ -11,8 +11,9 @@ import UIKit
 class TableViewController: UITableViewController {
     
     @IBOutlet var headerView: UIView!
+    @IBOutlet var countLabel: UILabel!
     
-    let count = 20
+    var count = rowCount
     
     lazy var refresher: UIRefreshControl = {
         
@@ -56,9 +57,16 @@ class TableViewController: UITableViewController {
         tableView.tableHeaderView = headerView
         tableView.tableFooterView = UIView.init(frame: .init(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 0.00001))
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+        
+        updateLabel()
 
         refreshControl = useRefreshControl ? refresher : nil
         refreshControl?.addTarget(self, action: #selector(refresh), for: .valueChanged)
+    }
+    
+    func updateLabel() {
+        
+        countLabel.text = "\(count)"
     }
     
     @IBAction func dismiss(_ sender: UIButton) {
@@ -71,6 +79,21 @@ class TableViewController: UITableViewController {
         guard gr.state == .began else { return }
         
         performSegue(withIdentifier: "unwind", sender: nil)
+    }
+    
+    @IBAction func changeCount(_ sender: UIButton) {
+        
+        if sender.tag == 0, count < 20 {
+            
+            count += 1
+            
+        } else if sender.tag == 1, count > 1 {
+            
+            count -= 1
+        }
+        
+        updateLabel()
+        tableView.reloadData()
     }
     
     @objc func refresh(_ control: UIRefreshControl) {

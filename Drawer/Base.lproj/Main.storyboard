@@ -18,10 +18,10 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="32" translatesAutoresizingMaskIntoConstraints="NO" id="0LO-LE-eU6">
-                                <rect key="frame" x="50" y="230" width="275" height="207"/>
+                                <rect key="frame" x="50" y="206" width="275" height="255"/>
                                 <subviews>
                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="16" translatesAutoresizingMaskIntoConstraints="NO" id="gLX-Li-7s1">
-                                        <rect key="frame" x="0.0" y="0.0" width="275" height="125"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="275" height="173"/>
                                         <subviews>
                                             <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ZSk-hg-s1Q">
                                                 <rect key="frame" x="0.0" y="0.0" width="275" height="31"/>
@@ -65,10 +65,27 @@
                                                     </switch>
                                                 </subviews>
                                             </stackView>
+                                            <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="JsR-xu-Tl3">
+                                                <rect key="frame" x="0.0" y="141" width="275" height="32"/>
+                                                <subviews>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="20 Rows" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="SJv-yy-rky">
+                                                        <rect key="frame" x="0.0" y="0.0" width="181" height="32"/>
+                                                        <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="20"/>
+                                                        <nil key="textColor"/>
+                                                        <nil key="highlightedColor"/>
+                                                    </label>
+                                                    <stepper opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="20" minimumValue="1" maximumValue="20" translatesAutoresizingMaskIntoConstraints="NO" id="7Ek-x8-f9P">
+                                                        <rect key="frame" x="181" y="0.0" width="94" height="32"/>
+                                                        <connections>
+                                                            <action selector="changeDefaultRowCount:" destination="BYZ-38-t0r" eventType="valueChanged" id="fFe-iY-TeX"/>
+                                                        </connections>
+                                                    </stepper>
+                                                </subviews>
+                                            </stackView>
                                         </subviews>
                                     </stackView>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="AI2-9f-lpo">
-                                        <rect key="frame" x="0.0" y="157" width="275" height="50"/>
+                                        <rect key="frame" x="0.0" y="205" width="275" height="50"/>
                                         <color key="backgroundColor" systemColor="groupTableViewBackgroundColor"/>
                                         <gestureRecognizers/>
                                         <constraints>
@@ -140,6 +157,8 @@
                     <connections>
                         <outlet property="presentSwitch" destination="2AV-gd-hbV" id="bt6-OS-rPT"/>
                         <outlet property="refreshSwitch" destination="4RM-WX-MAn" id="3a3-gk-KRY"/>
+                        <outlet property="rowLabel" destination="SJv-yy-rky" id="g38-Mc-pYx"/>
+                        <outlet property="rowStepper" destination="7Ek-x8-f9P" id="bje-51-mSH"/>
                         <outlet property="titleLabelTopConstraint" destination="jrq-9d-Xom" id="8IG-gU-JDG"/>
                         <outlet property="transformSwitch" destination="DbK-tf-U55" id="qf8-VJ-nKJ"/>
                     </connections>
@@ -239,13 +258,64 @@
                                 <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" spacing="16" translatesAutoresizingMaskIntoConstraints="NO" id="Iqi-0t-BwE">
                                     <rect key="frame" x="16" y="16" width="343" height="44"/>
                                     <subviews>
+                                        <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="NBx-Fx-B8Y">
+                                            <rect key="frame" x="0.0" y="0.0" width="103.5" height="44"/>
+                                            <subviews>
+                                                <button opaque="NO" tag="1" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="diR-Ge-O0H">
+                                                    <rect key="frame" x="0.0" y="0.0" width="41" height="44"/>
+                                                    <color key="backgroundColor" systemColor="systemGray5Color"/>
+                                                    <gestureRecognizers/>
+                                                    <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="17"/>
+                                                    <color key="tintColor" systemColor="labelColor"/>
+                                                    <state key="normal" image="minus" catalog="system"/>
+                                                    <userDefinedRuntimeAttributes>
+                                                        <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                                            <integer key="value" value="8"/>
+                                                        </userDefinedRuntimeAttribute>
+                                                    </userDefinedRuntimeAttributes>
+                                                    <connections>
+                                                        <action selector="changeCount:" destination="pzk-Zl-GTA" eventType="touchUpInside" id="JLK-RQ-Ccf"/>
+                                                    </connections>
+                                                </button>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="20" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="p4P-xA-uG0">
+                                                    <rect key="frame" x="41" y="0.0" width="21.5" height="44"/>
+                                                    <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="17"/>
+                                                    <nil key="textColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Rw7-SI-RjW">
+                                                    <rect key="frame" x="62.5" y="0.0" width="41" height="44"/>
+                                                    <color key="backgroundColor" systemColor="systemGray5Color"/>
+                                                    <gestureRecognizers/>
+                                                    <color key="tintColor" systemColor="labelColor"/>
+                                                    <state key="normal" image="plus" catalog="system"/>
+                                                    <userDefinedRuntimeAttributes>
+                                                        <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                                            <integer key="value" value="8"/>
+                                                        </userDefinedRuntimeAttribute>
+                                                    </userDefinedRuntimeAttributes>
+                                                    <connections>
+                                                        <action selector="changeCount:" destination="pzk-Zl-GTA" eventType="touchUpInside" id="IIQ-St-cXn"/>
+                                                    </connections>
+                                                </button>
+                                            </subviews>
+                                            <color key="backgroundColor" systemColor="systemGray5Color"/>
+                                            <constraints>
+                                                <constraint firstItem="diR-Ge-O0H" firstAttribute="width" secondItem="Rw7-SI-RjW" secondAttribute="width" id="kcV-Ie-XjP"/>
+                                            </constraints>
+                                            <userDefinedRuntimeAttributes>
+                                                <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                                    <integer key="value" value="8"/>
+                                                </userDefinedRuntimeAttribute>
+                                            </userDefinedRuntimeAttributes>
+                                        </stackView>
                                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="YAo-yi-tNM">
-                                            <rect key="frame" x="0.0" y="0.0" width="163.5" height="44"/>
+                                            <rect key="frame" x="119.5" y="0.0" width="104" height="44"/>
                                             <color key="backgroundColor" systemColor="systemGray5Color"/>
                                             <gestureRecognizers/>
                                             <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="17"/>
                                             <color key="tintColor" systemColor="labelColor"/>
-                                            <state key="normal" title="Close View"/>
+                                            <state key="normal" title="Close"/>
                                             <userDefinedRuntimeAttributes>
                                                 <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
                                                     <integer key="value" value="8"/>
@@ -257,11 +327,11 @@
                                             </connections>
                                         </button>
                                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="CgS-V7-zNi">
-                                            <rect key="frame" x="179.5" y="0.0" width="163.5" height="44"/>
+                                            <rect key="frame" x="239.5" y="0.0" width="103.5" height="44"/>
                                             <color key="backgroundColor" systemColor="systemGray5Color"/>
                                             <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="17"/>
                                             <color key="tintColor" systemColor="labelColor"/>
-                                            <state key="normal" title="Open Next"/>
+                                            <state key="normal" title="New"/>
                                             <userDefinedRuntimeAttributes>
                                                 <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
                                                     <integer key="value" value="8"/>
@@ -292,6 +362,7 @@
                     </tableView>
                     <navigationItem key="navigationItem" id="pqd-Gk-9Ql"/>
                     <connections>
+                        <outlet property="countLabel" destination="p4P-xA-uG0" id="Pes-CD-Z0B"/>
                         <outlet property="headerView" destination="Yxr-q4-aoq" id="3Zm-nk-P5e"/>
                         <segue destination="MKc-pa-fUK" kind="unwind" identifier="unwind" unwindAction="unwind:" id="rqr-ij-tp7"/>
                     </connections>
@@ -326,9 +397,11 @@
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="omn-7d-u8h"/>
+        <segue reference="wyd-Tc-dOX"/>
     </inferredMetricsTieBreakers>
     <resources>
+        <image name="minus" catalog="system" width="128" height="24"/>
+        <image name="plus" catalog="system" width="128" height="113"/>
         <systemColor name="groupTableViewBackgroundColor">
             <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>

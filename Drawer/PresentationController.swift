@@ -109,7 +109,7 @@ class PresentationController: UIPresentationController {
                 
                 if use3DTransforms {
                     
-                    self.grandPresenter?.view.layer.transform = self.transform3D(for: self.grandPresenter, completed: true)
+                    self.grandPresenter?.view.layer.transform = CATransform3DTranslate(self.transform3D(for: self.grandPresenter, completed: true), 0, 10, 1.0)
                     
                 } else {
                 
@@ -130,7 +130,7 @@ class PresentationController: UIPresentationController {
                 if use3DTransforms {
                     
                     presenter.view.layer.transform = self.transform3D(for: presenter, completed: true)
-                    self.grandPresenter?.view.layer.transform = CATransform3DTranslate(self.transform3D(for: self.grandPresenter, completed: true), 0, 10, self.grandPresenter is ViewController ? 1.00001 : 1.0)
+                    self.grandPresenter?.view.layer.transform = CATransform3DTranslate(self.transform3D(for: self.grandPresenter, completed: true), 0, 10, 1.0)
                 
                 } else {
                     
@@ -153,7 +153,7 @@ class PresentationController: UIPresentationController {
         if use3DTransforms {
         
             presenter.view.layer.transform = transform3D(for: presenter, completed: true)
-            grandPresenter?.view.layer.transform = CATransform3DTranslate(transform3D(for: grandPresenter, completed: true), 0, 10, grandPresenter is ViewController ? 1.00001 : 1.0)
+            grandPresenter?.view.layer.transform = CATransform3DTranslate(transform3D(for: grandPresenter, completed: true), 0, completed ? grandParentYTranslation : 0, 1.0)
             
         } else {
             
@@ -256,8 +256,8 @@ class PresentationController: UIPresentationController {
         
         if use3DTransforms {
             
-            presenter.view.layer.transform = CATransform3DIdentity
-            grandPresenter?.view.layer.transform = transform3D(for: grandPresenter, completed: true)
+            presenter.view.layer.transform = completed ? CATransform3DIdentity : transform3D(for: presenter, completed: true)
+            grandPresenter?.view.layer.transform = CATransform3DTranslate(transform3D(for: grandPresenter, completed: true), 0, completed ? 0 : grandParentYTranslation, /*grandPresenter is ViewController ? 1.00001 : */1.0)//transform3D(for: grandPresenter, completed: true)
             
         } else {
             
@@ -331,15 +331,6 @@ extension PresentationController {
             
             return CATransform3DScale(CATransform3DIdentity, (UIScreen.main.bounds.width - 32) / UIScreen.main.bounds.width, (UIScreen.main.bounds.height - (newOrigin * 2)) / UIScreen.main.bounds.height, 1.0)
         }
-    }
-    
-    func frame(for vc: UIViewController?, completed: Bool) -> CGRect {
-        
-        let ratio = (UIScreen.main.bounds.width - 32) / UIScreen.main.bounds.width
-        let height = frameOfPresentedViewInContainerView.height
-        let newHeight = height * ratio
-        
-        return .init(x: 16, y: statusBarHeight + 10, width: UIScreen.main.bounds.width - 32, height: newHeight)
     }
     
     func radius(for state: PresentationAnimator.State, completed: Bool) -> CGFloat {

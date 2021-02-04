@@ -123,7 +123,7 @@ class PresentationInteractor: UIPercentDrivenInteractiveTransition {
                     }
                 }
             
-                if !(gr is UIScreenEdgePanGestureRecognizer), let vc = viewController as? Scrollable, let scroller = vc.scroller {
+                if !(gr is UIScreenEdgePanGestureRecognizer), let vc = viewController as? Scrollable, let scroller = vc.scroller, !translation.y.isZero { // checking non-zero translation added 4/2/21
                     
                     if vc.scrollDirectionMatchesDismissal(via: gr) {
                         
@@ -131,8 +131,6 @@ class PresentationInteractor: UIPercentDrivenInteractiveTransition {
                             
                             scroller.bounces = false
                         }
-                        
-//                        vc.scroller?.contentOffset.y = vc.currentOffset
                     
                     } else {
                         
@@ -274,8 +272,8 @@ extension PresentationInteractor: UIGestureRecognizerDelegate {
             
             scrollBeganFromScroller = !vc.scrollerDoesNotContainTouch(from: gr)
             
-            if vc.refreshControl == nil {
-            
+            if vc.refreshControl == nil, gr.translation(in: gr.view).y > 0 {
+                
                 vc.scroller?.bounces = false
             }
             
