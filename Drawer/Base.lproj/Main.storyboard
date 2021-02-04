@@ -258,11 +258,28 @@
                                 <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" spacing="16" translatesAutoresizingMaskIntoConstraints="NO" id="Iqi-0t-BwE">
                                     <rect key="frame" x="16" y="16" width="343" height="44"/>
                                     <subviews>
-                                        <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="NBx-Fx-B8Y">
+                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="YAo-yi-tNM">
                                             <rect key="frame" x="0.0" y="0.0" width="103.5" height="44"/>
+                                            <color key="backgroundColor" systemColor="systemGray5Color"/>
+                                            <gestureRecognizers/>
+                                            <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="17"/>
+                                            <color key="tintColor" systemColor="labelColor"/>
+                                            <state key="normal" title="Close"/>
+                                            <userDefinedRuntimeAttributes>
+                                                <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                                    <integer key="value" value="8"/>
+                                                </userDefinedRuntimeAttribute>
+                                            </userDefinedRuntimeAttributes>
+                                            <connections>
+                                                <action selector="dismiss:" destination="pzk-Zl-GTA" eventType="touchUpInside" id="TaB-z0-JHr"/>
+                                                <outletCollection property="gestureRecognizers" destination="R5x-v4-jBb" appends="YES" id="OAf-if-ZYB"/>
+                                            </connections>
+                                        </button>
+                                        <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="NBx-Fx-B8Y">
+                                            <rect key="frame" x="119.5" y="0.0" width="104" height="44"/>
                                             <subviews>
                                                 <button opaque="NO" tag="1" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="diR-Ge-O0H">
-                                                    <rect key="frame" x="0.0" y="0.0" width="41" height="44"/>
+                                                    <rect key="frame" x="0.0" y="0.0" width="41.5" height="44"/>
                                                     <color key="backgroundColor" systemColor="systemGray5Color"/>
                                                     <gestureRecognizers/>
                                                     <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="17"/>
@@ -278,13 +295,13 @@
                                                     </connections>
                                                 </button>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="20" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="p4P-xA-uG0">
-                                                    <rect key="frame" x="41" y="0.0" width="21.5" height="44"/>
+                                                    <rect key="frame" x="41.5" y="0.0" width="21.5" height="44"/>
                                                     <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="17"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Rw7-SI-RjW">
-                                                    <rect key="frame" x="62.5" y="0.0" width="41" height="44"/>
+                                                    <rect key="frame" x="63" y="0.0" width="41" height="44"/>
                                                     <color key="backgroundColor" systemColor="systemGray5Color"/>
                                                     <gestureRecognizers/>
                                                     <color key="tintColor" systemColor="labelColor"/>
@@ -309,23 +326,6 @@
                                                 </userDefinedRuntimeAttribute>
                                             </userDefinedRuntimeAttributes>
                                         </stackView>
-                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="YAo-yi-tNM">
-                                            <rect key="frame" x="119.5" y="0.0" width="104" height="44"/>
-                                            <color key="backgroundColor" systemColor="systemGray5Color"/>
-                                            <gestureRecognizers/>
-                                            <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="17"/>
-                                            <color key="tintColor" systemColor="labelColor"/>
-                                            <state key="normal" title="Close"/>
-                                            <userDefinedRuntimeAttributes>
-                                                <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
-                                                    <integer key="value" value="8"/>
-                                                </userDefinedRuntimeAttribute>
-                                            </userDefinedRuntimeAttributes>
-                                            <connections>
-                                                <action selector="dismiss:" destination="pzk-Zl-GTA" eventType="touchUpInside" id="TaB-z0-JHr"/>
-                                                <outletCollection property="gestureRecognizers" destination="R5x-v4-jBb" appends="YES" id="OAf-if-ZYB"/>
-                                            </connections>
-                                        </button>
                                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="CgS-V7-zNi">
                                             <rect key="frame" x="239.5" y="0.0" width="103.5" height="44"/>
                                             <color key="backgroundColor" systemColor="systemGray5Color"/>
