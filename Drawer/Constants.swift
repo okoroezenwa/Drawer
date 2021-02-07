@@ -34,6 +34,13 @@ var use3DTransforms: Bool {
     set { UserDefaults.standard.set(newValue, forKey: .use3DTransforms) }
 }
 
+var animateBottomView: Bool {
+    
+    get { UserDefaults.standard.bool(forKey: .animateBottomView) }
+    
+    set { UserDefaults.standard.set(newValue, forKey: .animateBottomView) }
+}
+
 var rowCount: Int {
     
     get { UserDefaults.standard.integer(forKey: .rowCount) }
@@ -75,4 +82,5 @@ extension String {
     static var useRefreshControl = "useRefreshControl"
     static var use3DTransforms = "use3DTransforms"
     static var rowCount = "rowCount"
+    static var animateBottomView = "animateBottomView"
 }

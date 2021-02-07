@@ -16,6 +16,7 @@ class ViewController: UIViewController {
     @IBOutlet var titleLabelTopConstraint: NSLayoutConstraint!
     @IBOutlet var rowStepper: UIStepper!
     @IBOutlet var rowLabel: UILabel!
+    @IBOutlet var animateSwitch: UISwitch!
     
     var useLightStatusBar = false {
         
@@ -42,6 +43,9 @@ class ViewController: UIViewController {
         transformSwitch.isOn = use3DTransforms
         transformSwitch.addTarget(self, action: #selector(toggleSwitches(_:)), for: .valueChanged)
         
+        animateSwitch.isOn = animateBottomView
+        animateSwitch.addTarget(self, action: #selector(toggleSwitches(_:)), for: .valueChanged)
+        
         rowStepper.value = Double(rowCount)
         updateLabel()
     }
@@ -53,17 +57,17 @@ class ViewController: UIViewController {
     
     @objc func toggleSwitches(_ sender: UISwitch) {
         
-        if sender == presentSwitch {
+        switch sender {
             
-            presentScrollable.toggle()
-            
-        } else if sender == refreshSwitch {
-            
-            useRefreshControl.toggle()
-        
-        } else if sender == transformSwitch {
-            
-            use3DTransforms.toggle()
+            case presentSwitch: presentScrollable.toggle()
+                
+            case refreshSwitch: useRefreshControl.toggle()
+                
+            case transformSwitch: use3DTransforms.toggle()
+                
+            case animateSwitch: animateBottomView.toggle()
+                
+            default: break
         }
     }
     

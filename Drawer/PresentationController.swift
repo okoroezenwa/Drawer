@@ -43,7 +43,6 @@ class PresentationController: UIPresentationController {
     
     lazy var newOrigin = statusBarHeight + 10
     var grandParentYTranslation = 10 as CGFloat
-    
     lazy var statusBarHeight: CGFloat = Drawer.statusBarHeight(from: containerView)
     
     override var frameOfPresentedViewInContainerView: CGRect {
@@ -82,6 +81,14 @@ class PresentationController: UIPresentationController {
             return
         }
         
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1, execute: { // risky, but it gives me what I want
+            
+            if animateBottomView, let scrollable = self.presentedViewController as? Scrollable, let animation = scrollable.presentationAnimation {
+
+                UIView.animate(withDuration: 0.8, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0, options: [.allowUserInteraction, .curveEaseOut], animations: animation, completion: nil)
+            }
+        })
+        
         if #available(iOS 11, *) { } else {
         
             if presenter is ViewController {
@@ -109,7 +116,7 @@ class PresentationController: UIPresentationController {
                 
                 if use3DTransforms {
                     
-                    self.grandPresenter?.view.layer.transform = CATransform3DTranslate(self.transform3D(for: self.grandPresenter, completed: true), 0, 10, 1.0)
+                    self.grandPresenter?.view.layer.transform = CATransform3DConcat(self.transform3D(for: self.grandPresenter, completed: true), CATransform3DMakeTranslation(0, self.grandParentYTranslation, 1))
                     
                 } else {
                 
@@ -130,7 +137,7 @@ class PresentationController: UIPresentationController {
                 if use3DTransforms {
                     
                     presenter.view.layer.transform = self.transform3D(for: presenter, completed: true)
-                    self.grandPresenter?.view.layer.transform = CATransform3DTranslate(self.transform3D(for: self.grandPresenter, completed: true), 0, 10, 1.0)
+                    self.grandPresenter?.view.layer.transform = CATransform3DConcat(self.transform3D(for: self.grandPresenter, completed: true), CATransform3DMakeTranslation(0, self.grandParentYTranslation, 1))
                 
                 } else {
                     
@@ -153,7 +160,7 @@ class PresentationController: UIPresentationController {
         if use3DTransforms {
         
             presenter.view.layer.transform = transform3D(for: presenter, completed: true)
-            grandPresenter?.view.layer.transform = CATransform3DTranslate(transform3D(for: grandPresenter, completed: true), 0, completed ? grandParentYTranslation : 0, 1.0)
+            grandPresenter?.view.layer.transform = CATransform3DConcat(transform3D(for: grandPresenter, completed: true), CATransform3DMakeTranslation(0, completed ? grandParentYTranslation : 0, 1))
             
         } else {
             
@@ -257,7 +264,7 @@ class PresentationController: UIPresentationController {
         if use3DTransforms {
             
             presenter.view.layer.transform = completed ? CATransform3DIdentity : transform3D(for: presenter, completed: true)
-            grandPresenter?.view.layer.transform = CATransform3DTranslate(transform3D(for: grandPresenter, completed: true), 0, completed ? 0 : grandParentYTranslation, /*grandPresenter is ViewController ? 1.00001 : */1.0)//transform3D(for: grandPresenter, completed: true)
+            grandPresenter?.view.layer.transform = CATransform3DConcat(transform3D(for: grandPresenter, completed: true), CATransform3DMakeTranslation(0, completed ? 0 : grandParentYTranslation, 1.0))
             
         } else {
             
@@ -277,10 +284,12 @@ class PresentationController: UIPresentationController {
             vc.useLightStatusBar = !completed
         }
     }
-    
+
     override func containerViewWillLayoutSubviews() {
-        
-        presentedView?.frame = frameOfPresentedViewInContainerView
+
+        super.containerViewWillLayoutSubviews()
+
+        presentedViewController.view.frame = frameOfPresentedViewInContainerView
     }
     
     override func size(forChildContentContainer container: UIContentContainer, withParentContainerSize parentSize: CGSize) -> CGSize {
@@ -321,9 +330,9 @@ extension PresentationController {
             let newHeight = height * ratio
             let translation = (height - newHeight) / 2
             
-            var transform = CATransform3DIdentity
-            transform = CATransform3DScale(transform, ratio, ratio, 1.00001)
-            transform = CATransform3DTranslate(transform, 0, -translation - 10, 0)
+            let scale = CATransform3DMakeScale(ratio, ratio, 1.00001)
+            let translationX = CATransform3DMakeTranslation(0, -translation - 10, 1)
+            let transform = CATransform3DConcat(scale, translationX)
             
             return transform
             

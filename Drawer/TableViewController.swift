@@ -8,17 +8,20 @@
 
 import UIKit
 
-class TableViewController: UITableViewController {
+class TableViewController: UIViewController {
     
-    @IBOutlet var headerView: UIView!
     @IBOutlet var countLabel: UILabel!
+    @IBOutlet var tableView: UITableView!
+    @IBOutlet var effectView: UIVisualEffectView!
+    @IBOutlet var effectViewBottomConstraint: NSLayoutConstraint!
     
     var count = rowCount
     
-    lazy var refresher: UIRefreshControl = {
+    lazy var refresher: UIRefreshControl? = {
+        
+        guard useRefreshControl else { return nil }
         
         let refreshControl = UIRefreshControl.init()
-        self.refreshControl = refreshControl
         refreshControl.addTarget(self, action: #selector(refresh), for: .valueChanged)
         tableView.addSubview(refreshControl)
         
@@ -40,9 +43,14 @@ class TableViewController: UITableViewController {
             tableView.scrollIndicatorInsets.top = 84
         }
         
+        let effectViewHeight = 54 as CGFloat
+        
         if #available(iOS 11, *), let inset = appDelegate.window?.rootViewController?.view.safeAreaInsets.bottom {
             
-            tableView.contentInset.bottom = inset
+            let bottomConstant = inset == 0 ? 12 : inset
+            effectViewBottomConstraint.constant = bottomConstant
+            
+            tableView.contentInset.bottom = bottomConstant + effectViewHeight
             
             if #available(iOS 13, *) {
             
@@ -52,16 +60,21 @@ class TableViewController: UITableViewController {
                 
                 tableView.scrollIndicatorInsets.bottom = inset
             }
+        
+        } else {
+            
+            tableView.contentInset.bottom = 12 + effectViewHeight
         }
         
-        tableView.tableHeaderView = headerView
+        if animateBottomView {
+        
+            effectView.transform = .init(translationX: 0, y: tableView.contentInset.bottom)
+        }
+        
         tableView.tableFooterView = UIView.init(frame: .init(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 0.00001))
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
         
         updateLabel()
-
-        refreshControl = useRefreshControl ? refresher : nil
-        refreshControl?.addTarget(self, action: #selector(refresh), for: .valueChanged)
     }
     
     func updateLabel() {
@@ -98,16 +111,17 @@ class TableViewController: UITableViewController {
     
     @objc func refresh(_ control: UIRefreshControl) {
             
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: { self.refreshControl?.endRefreshing() })
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: { self.refresher?.endRefreshing() })
     }
+}
 
-    // MARK: - Table view data source
-
-    override func numberOfSections(in tableView: UITableView) -> Int { 1 }
-
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int { count }
+extension TableViewController: UITableViewDelegate, UITableViewDataSource {
     
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    func numberOfSections(in tableView: UITableView) -> Int { 1 }
+
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int { count }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
         
@@ -117,7 +131,7 @@ class TableViewController: UITableViewController {
         return cell
     }
     
-    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
         let vc = UIStoryboard.init(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "TableViewController")
         

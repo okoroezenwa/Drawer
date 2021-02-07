@@ -44,7 +44,14 @@ class SecondViewController: UIViewController, Scrollable {
         
         guard let child = (children.first as? UINavigationController)?.topViewController as? TableViewController else { return nil }
         
-        return child.refreshControl
+        return child.refresher
+    }
+    
+    var presentationAnimation: (() -> ())? {
+        
+        guard let child = (children.first as? UINavigationController)?.topViewController as? TableViewController else { return nil }
+        
+        return { child.effectView?.transform = .identity }
     }
     
     // MARK: - Other Variables
@@ -137,6 +144,7 @@ protocol Scrollable: class {
     var scroller: UIScrollView? { get }
     var refreshControl: UIRefreshControl? { get }
     var isAtTop: Bool { get }
+    var presentationAnimation: (() -> ())? { get }
     func scrollerDoesNotContainTouch(from gr: UIPanGestureRecognizer) -> Bool
     func canBeginDismissal(with gr: UIPanGestureRecognizer) -> Bool
     func scrollDirectionMatchesDismissal(via gr: UIPanGestureRecognizer) -> Bool
