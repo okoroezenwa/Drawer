@@ -8,7 +8,7 @@
 
 import UIKit
 
-typealias ScrollableViewController = UIViewController & Scrollable
+typealias DismissableViewController = UIViewController & ScrollViewDismissable
 var root: ViewController? { appDelegate.window?.rootViewController as? ViewController }
 var topViewController: UIViewController? { return topVC(startingFrom: appDelegate.window?.rootViewController) }
 let appDelegate = UIApplication.shared.delegate as! AppDelegate
@@ -48,13 +48,13 @@ var rowCount: Int {
     set { UserDefaults.standard.set(newValue, forKey: .rowCount) }
 }
 
-func previousScrollableViewController(from viewController: UIViewController?) -> ScrollableViewController? {
+func previousDismissableViewController(from viewController: UIViewController?) -> DismissableViewController? {
     
     guard viewController != nil else { return nil }
     
-    if let scrollable = rootOfPresentedViewController(from: viewController) as? ScrollableViewController { return scrollable }
+    if let dismissable = rootOfPresentedViewController(from: viewController) as? DismissableViewController { return dismissable }
     
-    return previousScrollableViewController(from: viewController?.presentingViewController)
+    return previousDismissableViewController(from: viewController?.presentingViewController)
 }
 
 func rootOfPresentedViewController(from viewController: UIViewController?) -> UIViewController? {

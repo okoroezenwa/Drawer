@@ -21,7 +21,7 @@ class PresentationInteractor: UIPercentDrivenInteractiveTransition {
     @objc func addToVC(_ vc: UIViewController) {
         
         viewController = vc
-        presenter = previousScrollableViewController(from: viewController?.presentingViewController) ?? root
+        presenter = previousDismissableViewController(from: viewController?.presentingViewController) ?? root
         
         let leftEdge = UIScreenEdgePanGestureRecognizer(target: self, action: #selector(handleGesture))
         leftEdge.edges = .left
@@ -47,7 +47,7 @@ class PresentationInteractor: UIPercentDrivenInteractiveTransition {
         let initialProgress = translation.y / (viewController.view.bounds.height - 20)
         let progress: CGFloat = {
             
-            if !(gr is UIScreenEdgePanGestureRecognizer), let vc = viewController as? Scrollable, let _ = vc.scroller, vc.scrollDirectionMatchesDismissal(via: gr), vc.refreshControl != nil, scrollBeganFromScroller { return 0 }
+            if !(gr is UIScreenEdgePanGestureRecognizer), let vc = viewController as? ScrollViewDismissable, let _ = vc.scroller, vc.scrollDirectionMatchesDismissal(via: gr), vc.refreshControl != nil, scrollBeganFromScroller { return 0 }
             
             return min(max(initialProgress, 0), 1)
         }()
@@ -72,7 +72,7 @@ class PresentationInteractor: UIPercentDrivenInteractiveTransition {
                     
                     if canBeginDismissal(via: gr) {
                         
-                        if !(gr is UIScreenEdgePanGestureRecognizer), let vc = viewController as? Scrollable, let offset = vc.scroller?.contentOffset.y {
+                        if !(gr is UIScreenEdgePanGestureRecognizer), let vc = viewController as? ScrollViewDismissable, let offset = vc.scroller?.contentOffset.y {
                             
                             vc.currentOffset = max(offset, -84)
                             vc.scroller?.contentOffset.y = vc.currentOffset
@@ -98,7 +98,7 @@ class PresentationInteractor: UIPercentDrivenInteractiveTransition {
                     
                     if !(gr is UIScreenEdgePanGestureRecognizer), scrollBeganFromScroller { } else {
                         
-                        if let vc = viewController as? Scrollable, let scroller = vc.scroller {
+                        if let vc = viewController as? ScrollViewDismissable, let scroller = vc.scroller {
                             
                             scroller.contentOffset.y = scroller.contentOffset.y
                         }
@@ -123,7 +123,7 @@ class PresentationInteractor: UIPercentDrivenInteractiveTransition {
                     }
                 }
             
-                if !(gr is UIScreenEdgePanGestureRecognizer), let vc = viewController as? Scrollable, let scroller = vc.scroller, !translation.y.isZero { // checking non-zero translation added 4/2/21
+                if !(gr is UIScreenEdgePanGestureRecognizer), let vc = viewController as? ScrollViewDismissable, let scroller = vc.scroller, !translation.y.isZero { // checking non-zero translation added 4/2/21
                     
                     if vc.scrollDirectionMatchesDismissal(via: gr) {
                         
@@ -156,7 +156,7 @@ class PresentationInteractor: UIPercentDrivenInteractiveTransition {
                 
                 interactionInProgress = false
                 
-                if !(gr is UIScreenEdgePanGestureRecognizer), let vc = viewController as? Scrollable, let _ = vc.refreshControl, vc.canBeginDismissal(with: gr), scrollBeganFromScroller {
+                if !(gr is UIScreenEdgePanGestureRecognizer), let vc = viewController as? ScrollViewDismissable, let _ = vc.refreshControl, vc.canBeginDismissal(with: gr), scrollBeganFromScroller {
                     
                     shouldCompleteTransition = translation.y > 0 && velocity.y > 1750
                     
@@ -173,7 +173,7 @@ class PresentationInteractor: UIPercentDrivenInteractiveTransition {
                     
                 } else {
                     
-                    if velocity.y <= 700, !(gr is UIScreenEdgePanGestureRecognizer), let scroller = (viewController as? Scrollable)?.scroller {
+                    if velocity.y <= 700, !(gr is UIScreenEdgePanGestureRecognizer), let scroller = (viewController as? ScrollViewDismissable)?.scroller {
                         
                         scroller.isScrollEnabled = false
                         scroller.isScrollEnabled = true
@@ -186,7 +186,7 @@ class PresentationInteractor: UIPercentDrivenInteractiveTransition {
                     cancel()
                 }
                 
-                if let vc = viewController as? Scrollable { vc.scroller?.isScrollEnabled = true } // seems to take care of issue where scrolling up at some in-between point of the header and scroll view causes both to perform their respective actions at once. Issue also seemed to have an effect on the offset that results in a dismissal later on
+                if let vc = viewController as? ScrollViewDismissable { vc.scroller?.isScrollEnabled = true } // seems to take care of issue where scrolling up at some in-between point of the header and scroll view causes both to perform their respective actions at once. Issue also seemed to have an effect on the offset that results in a dismissal later on
                 
                 if #available(iOS 11, *) { } else { animateRadius(shouldCompleteTransition: shouldCompleteTransition) }
                 updateStatusBar(shouldCompleteTransition: shouldCompleteTransition)
@@ -197,7 +197,7 @@ class PresentationInteractor: UIPercentDrivenInteractiveTransition {
     
     func returnBounce(via gr: UIPanGestureRecognizer) {
         
-        guard !(gr is UIScreenEdgePanGestureRecognizer), let scroller = (viewController as? Scrollable)?.scroller else { return }
+        guard !(gr is UIScreenEdgePanGestureRecognizer), let scroller = (viewController as? ScrollViewDismissable)?.scroller else { return }
             
         scroller.bounces = true
     }
@@ -238,7 +238,7 @@ extension PresentationInteractor: UIGestureRecognizerDelegate {
         
         let isAtTop: Bool = {
             
-            if let vc = viewController as? Scrollable {
+            if let vc = viewController as? ScrollViewDismissable {
                 
                 return vc.canBeginDismissal(with: gr)
             }
@@ -248,7 +248,7 @@ extension PresentationInteractor: UIGestureRecognizerDelegate {
         
         let interactsWithRefreshControl: Bool = {
             
-            if let vc = viewController as? Scrollable {
+            if let vc = viewController as? ScrollViewDismissable {
                 
                 return vc.refreshControl != nil && !vc.scrollerDoesNotContainTouch(from: gr)
             }
@@ -263,12 +263,12 @@ extension PresentationInteractor: UIGestureRecognizerDelegate {
         
         if gestureRecognizer is UIScreenEdgePanGestureRecognizer { return otherGestureRecognizer is UIScreenEdgePanGestureRecognizer }
         
-        return gestureRecognizer is UIPanGestureRecognizer && otherGestureRecognizer == (viewController as? Scrollable)?.gestureRecogniser
+        return gestureRecognizer is UIPanGestureRecognizer && otherGestureRecognizer == (viewController as? ScrollViewDismissable)?.gestureRecogniser
     }
     
     func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         
-        if let gr = gestureRecognizer as? UIPanGestureRecognizer, !(gr is UIScreenEdgePanGestureRecognizer), let vc = viewController as? Scrollable {
+        if let gr = gestureRecognizer as? UIPanGestureRecognizer, !(gr is UIScreenEdgePanGestureRecognizer), let vc = viewController as? ScrollViewDismissable {
             
             scrollBeganFromScroller = !vc.scrollerDoesNotContainTouch(from: gr)
             
@@ -298,7 +298,7 @@ extension PresentationInteractor: UIGestureRecognizerDelegate {
     
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldBeRequiredToFailBy otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         
-        if gestureRecognizer is UIScreenEdgePanGestureRecognizer, let vc = viewController as? Scrollable { return vc.scroller?.panGestureRecognizer == otherGestureRecognizer }
+        if gestureRecognizer is UIScreenEdgePanGestureRecognizer, let vc = viewController as? ScrollViewDismissable { return vc.scroller?.panGestureRecognizer == otherGestureRecognizer }
         
         return false
     }

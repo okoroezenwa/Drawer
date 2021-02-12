@@ -8,14 +8,14 @@
 
 import UIKit
 
-class SecondViewController: UIViewController, Scrollable {
+class SecondViewController: UIViewController, ScrollViewDismissable {
     
     // MARK: - Storyboard Views
     
     @IBOutlet var navigationBar: UIVisualEffectView!
     @IBOutlet var titleLabel: UILabel!
     
-    // MARK: - Scrollable Conformance
+    // MARK: - ScrollViewDismissable Conformance
     
     var gestureRecogniser: UIPanGestureRecognizer? {
         
@@ -137,7 +137,7 @@ class SecondViewController: UIViewController, Scrollable {
     }
 }
 
-protocol Scrollable: class {
+protocol ScrollViewDismissable: class {
     
     var gestureRecogniser: UIPanGestureRecognizer? { get }
     var currentOffset: CGFloat { get set }

@@ -38,8 +38,8 @@ class PresentationController: UIPresentationController {
         return view
     }()
     
-    lazy var presenter = previousScrollableViewController(from: presentingViewController) ?? root
-    lazy var grandPresenter = (previousScrollableViewController(from: presenter?.presentingViewController) ?? root).value(if: { $0 != presenter })
+    lazy var presenter = previousDismissableViewController(from: presentingViewController) ?? root
+    lazy var grandPresenter = (previousDismissableViewController(from: presenter?.presentingViewController) ?? root).value(if: { $0 != presenter })
     
     lazy var newOrigin = statusBarHeight + 10
     var grandParentYTranslation = 10 as CGFloat
@@ -83,7 +83,7 @@ class PresentationController: UIPresentationController {
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1, execute: { // risky, but it gives me what I want
             
-            if animateBottomView, let scrollable = self.presentedViewController as? Scrollable, let animation = scrollable.presentationAnimation {
+            if animateBottomView, let dismissable = self.presentedViewController as? ScrollViewDismissable, let animation = dismissable.presentationAnimation {
 
                 UIView.animate(withDuration: 0.8, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0, options: [.allowUserInteraction, .curveEaseOut], animations: animation, completion: nil)
             }
