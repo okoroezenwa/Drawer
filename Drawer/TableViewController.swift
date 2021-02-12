@@ -12,7 +12,14 @@ class TableViewController: UIViewController {
     
     @IBOutlet var countLabel: UILabel!
     @IBOutlet var tableView: UITableView!
-    @IBOutlet var effectView: UIVisualEffectView!
+    @IBOutlet var effectView: UIVisualEffectView! {
+        
+        didSet {
+            
+            effectView.layer.borderWidth = 1.1
+            updateEffectViewBorder()
+        }
+    }
     @IBOutlet var effectViewBottomConstraint: NSLayoutConstraint!
     
     var count = rowCount
@@ -82,6 +89,20 @@ class TableViewController: UIViewController {
         countLabel.text = "\(count)"
     }
     
+    func updateEffectViewBorder() {
+        
+        let value = 0.08 as CGFloat
+        
+        if #available(iOS 13.0, *) {
+            
+            effectView.layer.borderColor = UIColor.label.withAlphaComponent(value).cgColor
+            
+        } else {
+            
+            effectView.layer.borderColor = UIColor.black.withAlphaComponent(value).cgColor
+        }
+    }
+    
     @IBAction func dismiss(_ sender: UIButton) {
         
         dismiss(animated: true, completion: nil)
@@ -112,6 +133,18 @@ class TableViewController: UIViewController {
     @objc func refresh(_ control: UIRefreshControl) {
             
         DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: { self.refresher?.endRefreshing() })
+    }
+    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        
+        super.traitCollectionDidChange(previousTraitCollection)
+        
+        guard #available(iOS 13, *) else { return }
+        
+        if traitCollection.userInterfaceStyle != previousTraitCollection?.userInterfaceStyle {
+            
+            updateEffectViewBorder()
+        }
     }
 }
 
