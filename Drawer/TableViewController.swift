@@ -39,16 +39,7 @@ class TableViewController: UIViewController {
         
         super.viewDidLoad()
         
-        tableView.contentInset.top = 84
-        
-        if #available(iOS 13, *) {
-            
-            tableView.verticalScrollIndicatorInsets.top = 84
-            
-        } else {
-            
-            tableView.scrollIndicatorInsets.top = 84
-        }
+        updateTopInsets(to: (parent as? ScrollViewDismissable)?.preferredOffset ?? (84 /*+ (useFullscreen ? statusBarHeightValue(from: view) : 0)*/))
         
         let effectViewHeight = 54 as CGFloat
         
@@ -87,6 +78,30 @@ class TableViewController: UIViewController {
     func updateLabel() {
         
         countLabel.text = "\(count)"
+    }
+    
+    func updateTopInsets(to value: CGFloat) {
+        
+        let number = value - {
+            
+            if let vc = parent as? ScrollViewDismissable, vc.isPresentedFullScreen {
+                
+                return statusBarHeightValue(from: view)
+            }
+            
+            return 0
+        }()
+        
+        tableView.contentInset.top = number
+        
+        if #available(iOS 13, *) {
+            
+            tableView.verticalScrollIndicatorInsets.top = number
+            
+        } else {
+            
+            tableView.scrollIndicatorInsets.top = number
+        }
     }
     
     func updateEffectViewBorder() {

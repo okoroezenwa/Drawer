@@ -8,7 +8,7 @@
 
 import UIKit
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, StatusBarControlling {
     
     @IBOutlet var presentSwitch: UISwitch!
     @IBOutlet var refreshSwitch: UISwitch!
@@ -17,6 +17,7 @@ class ViewController: UIViewController {
     @IBOutlet var rowStepper: UIStepper!
     @IBOutlet var rowLabel: UILabel!
     @IBOutlet var animateSwitch: UISwitch!
+    @IBOutlet var fullscreenSwitch: UISwitch!
     
     var useLightStatusBar = false {
         
@@ -32,7 +33,7 @@ class ViewController: UIViewController {
         
         super.viewDidLoad()
         
-        titleLabelTopConstraint.constant = 20 + statusBarHeight(from: view)
+        titleLabelTopConstraint.constant = 20 + statusBarHeightValue(from: view)
         
         presentSwitch.isOn = presentScrollable
         presentSwitch.addTarget(self, action: #selector(toggleSwitches(_:)), for: .valueChanged)
@@ -45,6 +46,9 @@ class ViewController: UIViewController {
         
         animateSwitch.isOn = animateBottomView
         animateSwitch.addTarget(self, action: #selector(toggleSwitches(_:)), for: .valueChanged)
+        
+        fullscreenSwitch.isOn = useFullscreen
+        fullscreenSwitch.addTarget(self, action: #selector(toggleSwitches(_:)), for: .valueChanged)
         
         rowStepper.value = Double(rowCount)
         updateLabel()
@@ -66,6 +70,8 @@ class ViewController: UIViewController {
             case transformSwitch: use3DTransforms.toggle()
                 
             case animateSwitch: animateBottomView.toggle()
+                
+            case fullscreenSwitch: useFullscreen.toggle()
                 
             default: break
         }

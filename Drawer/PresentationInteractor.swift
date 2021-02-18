@@ -44,7 +44,7 @@ class PresentationInteractor: UIPercentDrivenInteractiveTransition {
         
         let translation = gr.translation(in: gr.view)
         let velocity = gr.velocity(in: gr.view)
-        let initialProgress = translation.y / (viewController.view.bounds.height - 20)
+        let initialProgress = translation.y / (viewController.view.bounds.height - 20 - cornerRadius)
         let progress: CGFloat = {
             
             if !(gr is UIScreenEdgePanGestureRecognizer), let vc = viewController as? ScrollViewDismissable, let _ = vc.scroller, vc.scrollDirectionMatchesDismissal(via: gr), vc.refreshControl != nil, scrollBeganFromScroller { return 0 }
@@ -74,7 +74,7 @@ class PresentationInteractor: UIPercentDrivenInteractiveTransition {
                         
                         if !(gr is UIScreenEdgePanGestureRecognizer), let vc = viewController as? ScrollViewDismissable, let offset = vc.scroller?.contentOffset.y {
                             
-                            vc.currentOffset = max(offset, -84)
+                            vc.currentOffset = max(offset, -vc.preferredOffset)
                             vc.scroller?.contentOffset.y = vc.currentOffset
                         }
                         
@@ -98,28 +98,40 @@ class PresentationInteractor: UIPercentDrivenInteractiveTransition {
                     
                     if !(gr is UIScreenEdgePanGestureRecognizer), scrollBeganFromScroller { } else {
                         
-                        if let vc = viewController as? ScrollViewDismissable, let scroller = vc.scroller {
+                        if let vc = viewController as? ScrollViewDismissable, !vc.isPresentedFullScreen, let scroller = vc.scroller {
                             
                             scroller.contentOffset.y = scroller.contentOffset.y
+                            
+                            let location = gr.location(in: appDelegate.window).y
+                            let progress = (startPoint - location) / startPoint
+                            
+                            viewController.view.transform = .init(translationX: 0, y: -progress * (progress - 2) * -20)
                         }
-                        
-                        let location = gr.location(in: appDelegate.window).y
-                        let progress = (startPoint - location) / startPoint
-                        
-                        viewController.view.transform = .init(translationX: 0, y: -progress * (progress - 2) * -20)
                     }
                     
                 } else {
+                    
+                    if #available(iOS 11, *) { } else if let vc = presenter as? ViewController {
+                        
+                        let value = cornerRadius - (progress * cornerRadius)
+                        vc.view.layer.cornerRadius = value
+                    }
                 
-                    if let vc = presenter as? ViewController {
+                    if let vc = viewController as? StatusBarControlling, let previous = presenter as? StatusBarControlling/*, previous is ViewController || (previous as? ScrollViewDismissable)?.isPresentedFullScreen == true*/ {
                         
-                        if #available(iOS 11, *) { } else {
+                        vc.useLightStatusBar = {
                             
-                            let value = cornerRadius - (progress * cornerRadius)
-                            vc.view.layer.cornerRadius = value
-                        }
-                        
-                        vc.useLightStatusBar = progress < 0.75
+                            let point = 14 / (viewController.view.bounds.height - 20 - cornerRadius)
+                            
+                            switch progress {
+                                
+                                case 0..<point: return (vc as? ScrollViewDismissable)?.isPresentedFullScreen == false
+
+                                case point...0.75: return true
+                                    
+                                default: return !(previous is ViewController || (previous as? ScrollViewDismissable)?.isPresentedFullScreen == true)
+                            }
+                        }()
                     }
                 }
             
@@ -218,9 +230,9 @@ class PresentationInteractor: UIPercentDrivenInteractiveTransition {
     
     func updateStatusBar(shouldCompleteTransition: Bool) {
         
-        if let vc = presenter as? ViewController {
+        if let vc = viewController as? StatusBarControlling, let previous = presenter as? StatusBarControlling/*, vc is ViewController || (vc as? ScrollViewDismissable)?.isPresentedFullScreen == true*/ {
             
-            vc.useLightStatusBar = !shouldCompleteTransition
+            vc.useLightStatusBar = shouldCompleteTransition ? previous.useLightStatusBar : !(vc is ViewController || (vc as? ScrollViewDismissable)?.isPresentedFullScreen == true)
         }
     }
 }
@@ -279,7 +291,7 @@ extension PresentationInteractor: UIGestureRecognizerDelegate {
             
             if vc.scrollerDoesNotContainTouch(from: gr), let offset = vc.scroller?.contentOffset.y {
                 vc.scroller?.isScrollEnabled = false
-                vc.currentOffset = max(offset, -84)
+                vc.currentOffset = max(offset, -vc.preferredOffset)
                 vc.scroller?.contentOffset.y = vc.currentOffset
             }
             

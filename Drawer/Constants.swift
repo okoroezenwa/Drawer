@@ -48,6 +48,13 @@ var rowCount: Int {
     set { UserDefaults.standard.set(newValue, forKey: .rowCount) }
 }
 
+var useFullscreen: Bool {
+    
+    get { UserDefaults.standard.bool(forKey: .useFullscreen) }
+    
+    set { UserDefaults.standard.set(newValue, forKey: .useFullscreen) }
+}
+
 func previousDismissableViewController(from viewController: UIViewController?) -> DismissableViewController? {
     
     guard viewController != nil else { return nil }
@@ -83,4 +90,5 @@ extension String {
     static var use3DTransforms = "use3DTransforms"
     static var rowCount = "rowCount"
     static var animateBottomView = "animateBottomView"
+    static var useFullscreen = "useFullscreen"
 }

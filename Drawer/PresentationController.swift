@@ -11,7 +11,7 @@ import UIKit
 let cornerRadius = 12 as CGFloat
 var numberOfControllers = 0
 
-func statusBarHeight(from view: UIView?) -> CGFloat {
+func statusBarHeightValue(from view: UIView?) -> CGFloat {
     
     if #available(iOS 13, *) {
         
@@ -43,16 +43,16 @@ class PresentationController: UIPresentationController {
     
     var newOrigin: CGFloat { statusBarHeight + 10 }
     var grandParentYTranslation = 10 as CGFloat
-    var statusBarHeight: CGFloat { Drawer.statusBarHeight(from: containerView) }
+    var statusBarHeight: CGFloat { statusBarHeightValue(from: containerView) }
     var orientation = UIApplication.shared.statusBarOrientation {
         
         didSet {
             
             guard orientation != oldValue else { return }
             
-            presentedView?.layer.masksToBounds = true
+//            presentedView?.layer.masksToBounds = true
             presentedView?.layer.cornerRadius = cornerRadius
-            presentedView?.layer.mask = nil
+//            presentedView?.layer.mask = nil
             orientationChanged = true
         }
     }
@@ -62,7 +62,11 @@ class PresentationController: UIPresentationController {
         
         var frame: CGRect = .zero
         frame.size = size(forChildContentContainer: presentedViewController, withParentContainerSize: containerView?.bounds.size ?? UIScreen.main.bounds.size)
-        frame.origin.y = UIScreen.main.bounds.height - frame.size.height + 20
+        
+        if let vc = presentedViewController as? ScrollViewDismissable, !vc.isPresentedFullScreen {
+            
+            frame.origin.y = UIScreen.main.bounds.height - frame.size.height + 20 + cornerRadius
+        }
         
         return frame
     }
@@ -77,12 +81,16 @@ class PresentationController: UIPresentationController {
         guard let presenter = presenter else { return }
         
         containerView?.insertSubview(dimmingView, at: 0)
-        presentedView?.layer.cornerRadius = cornerRadius
-        presentedView?.round([.topLeft, .topRight], radius: cornerRadius)
-
-        if let vc = presenter as? ViewController {
+        presentedView?.clipsToBounds = true
+        
+        if let vc = presentedViewController as? ScrollViewDismissable, !vc.isPresentedFullScreen {
             
-            vc.useLightStatusBar = true
+            presentedView?.layer.cornerRadius = cornerRadius
+        }
+
+        if let vc = presentedViewController as? StatusBarControlling/*, vc is ViewController || (vc as? ScrollViewDismissable)?.isPresentedFullScreen == true*/ {
+            
+            vc.useLightStatusBar = (vc as? ScrollViewDismissable)?.isPresentedFullScreen == false
         }
         
         NSLayoutConstraint.activate(NSLayoutConstraint.constraints(withVisualFormat: "V:|[dimmingView]|", options: [], metrics: nil, views: ["dimmingView": dimmingView]) + NSLayoutConstraint.constraints(withVisualFormat: "H:|[dimmingView]|",
@@ -105,7 +113,7 @@ class PresentationController: UIPresentationController {
         
         if #available(iOS 11, *) { } else {
         
-            if presenter is ViewController {
+            if presenter is ViewController || (presenter as? ScrollViewDismissable)?.isPresentedFullScreen == true {
             
                 presenter.view.layer.animate(#keyPath(CALayer.cornerRadius), from: 0, to: cornerRadius, duration: coordinator.transitionDuration, timingFunctionName: .linear)
             }
@@ -201,14 +209,14 @@ class PresentationController: UIPresentationController {
         
         if !coordinator.isInteractive {
             
-            if let vc = presenter as? ViewController {
+            if let vc = presentingViewController as? StatusBarControlling, let previous = presenter as? StatusBarControlling/*, vc is ViewController || (vc as? ScrollViewDismissable)?.isPresentedFullScreen == true*/ {
                 
-                vc.useLightStatusBar = false
+                vc.useLightStatusBar = previous.useLightStatusBar
             }
         
             if #available(iOS 11, *) { } else {
 
-                if presenter is ViewController {
+                if presenter is ViewController || (presenter as? ScrollViewDismissable)?.isPresentedFullScreen == true {
                                 
                     presenter?.view.layer.animate(#keyPath(CALayer.cornerRadius), from: cornerRadius, to: 0, duration: coordinator.transitionDuration, timingFunctionName: .linear)
                 }
@@ -250,7 +258,10 @@ class PresentationController: UIPresentationController {
             
             if #available(iOS 11, *) {
                 
-                self.presenter?.view.layer.cornerRadius = 0
+                if self.presenter is ViewController || (self.presenter as? ScrollViewDismissable)?.isPresentedFullScreen == true {
+                    
+                    self.presenter?.view.layer.cornerRadius = 0
+                }
                 
                 if use3DTransforms {
                     
@@ -286,16 +297,16 @@ class PresentationController: UIPresentationController {
             grandPresenter?.view.transform = transform(for: grandPresenter, completed: true).translatedBy(x: 0, y: completed ? 0 : grandParentYTranslation)
         }
         
-        if presenter is ViewController {
+        if presenter is ViewController || (presenter as? ScrollViewDismissable)?.isPresentedFullScreen == true {
         
             presenter.view.layer.cornerRadius = completed ? 0 : cornerRadius
             
             if #available(iOS 11, *) { } else { presenter.view.layer.removeAllAnimations() }
         }
         
-        if let coordinator = presentedViewController.transitionCoordinator, !coordinator.isInteractive, let vc = presenter as? ViewController {
+        if !completed, let coordinator = presentedViewController.transitionCoordinator, !coordinator.isInteractive, let vc = presentingViewController as? StatusBarControlling/*, vc is ViewController || (vc as? ScrollViewDismissable)?.isPresentedFullScreen == true*/ {
 
-            vc.useLightStatusBar = !completed
+            vc.useLightStatusBar = (vc as? ScrollViewDismissable)?.isPresentedFullScreen == false
         }
     }
     
@@ -321,8 +332,8 @@ class PresentationController: UIPresentationController {
                 self.presenter?.view.layer.transform = self.transform3D(for: self.presenter, completed: true)
             }
             
-            self.presentedView?.round([.topLeft, .topRight], radius: cornerRadius)
-            self.presentedView?.layer.masksToBounds = false
+//            self.presentedView?.round([.topLeft, .topRight], radius: cornerRadius)
+//            self.presentedView?.layer.masksToBounds = false
             self.presentedView?.layer.cornerRadius = 0
             self.orientationChanged = false
         })
@@ -336,7 +347,45 @@ class PresentationController: UIPresentationController {
     
     override func size(forChildContentContainer container: UIContentContainer, withParentContainerSize parentSize: CGSize) -> CGSize {
         
-        return .init(width: parentSize.width, height: parentSize.height - statusBarHeight - 20 + 20) // added 20 takes care of swiping up instead of down during dismissal
+        var difference: CGFloat {
+            
+            guard let vc = presentedViewController as? ScrollViewDismissable, !vc.isPresentedFullScreen else { return 0 }
+            
+            return statusBarHeight + 20
+        }
+        
+        return .init(width: parentSize.width, height: parentSize.height - difference + 20 + cornerRadius) // added 20 takes care of swiping up instead of down during dismissal
+    }
+    
+    override func preferredContentSizeDidChange(forChildContentContainer container: UIContentContainer) {
+        
+        super.preferredContentSizeDidChange(forChildContentContainer: container)
+        
+        if #available(iOS 11, *) { } else {
+        
+            if let dismissable = presentedViewController as? ScrollViewDismissable & UIViewController {
+            
+                dismissable.view.layer.animate(#keyPath(CALayer.cornerRadius), from: dismissable.isPresentedFullScreen ? cornerRadius : 0, to: dismissable.isPresentedFullScreen ? 0 : cornerRadius, duration: 0.3, timingFunctionName: .linear)
+            }
+        }
+        
+        UIView.animate(withDuration: 0.3, animations: {
+            
+            self.containerView?.setNeedsLayout()
+            self.containerView?.layoutIfNeeded()
+            
+            if #available(iOS 11, *), let dismissable = self.presentedViewController as? ScrollViewDismissable & UIViewController {
+                
+                dismissable.view.layer.cornerRadius = dismissable.isPresentedFullScreen ? 0 : cornerRadius
+            }
+        
+        }, completion: { _ in
+            
+            if let dismissable = self.presentedViewController as? ScrollViewDismissable & UIViewController {
+                
+                dismissable.view.layer.cornerRadius = dismissable.isPresentedFullScreen ? 0 : cornerRadius
+            }
+        })
     }
 }
 
@@ -346,7 +395,7 @@ extension PresentationController {
         
         guard completed else { return .identity }
         
-        if !(vc is ViewController) {
+        if let vc = vc as? ScrollViewDismissable, !vc.isPresentedFullScreen {
             
             let ratio = (UIScreen.main.bounds.width - 32) / UIScreen.main.bounds.width
             let height = frameOfPresentedViewInContainerView.height
@@ -365,7 +414,7 @@ extension PresentationController {
         
         guard completed else { return CATransform3DIdentity }
         
-        if !(vc is ViewController) {
+        if let vc = vc as? ScrollViewDismissable, !vc.isPresentedFullScreen {
         
             let ratio = (UIScreen.main.bounds.width - 32) / UIScreen.main.bounds.width
             let height = frameOfPresentedViewInContainerView.height
@@ -379,7 +428,9 @@ extension PresentationController {
             
         } else {
             
-            return CATransform3DScale(.identity, (UIScreen.main.bounds.width - 32) / UIScreen.main.bounds.width, (UIScreen.main.bounds.height - (newOrigin * 2)) / UIScreen.main.bounds.height, 1.0)
+            let fullScreenPresentationExtraHeight: CGFloat = vc is ViewController ? 0 : (20 + 16)
+            
+            return CATransform3D.identity.concatenating(.scale(x: (UIScreen.main.bounds.width - 32) / UIScreen.main.bounds.width, y: (UIScreen.main.bounds.height + fullScreenPresentationExtraHeight - (newOrigin * 2)) / (UIScreen.main.bounds.height + fullScreenPresentationExtraHeight), z: 1.00001))
         }
     }
     

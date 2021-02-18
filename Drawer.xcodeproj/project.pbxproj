@@ -10,6 +10,7 @@
 		BE13C7DC24FCF14600547AD6 /* NavigationAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE13C7DB24FCF14500547AD6 /* NavigationAnimator.swift */; };
 		BE13C7DE24FCF4CA00547AD6 /* NavigationInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE13C7DD24FCF4CA00547AD6 /* NavigationInteractor.swift */; };
 		BE2E830025CBD3D100131C8C /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE2E82FF25CBD3D100131C8C /* Constants.swift */; };
+		BE3B737425D92F63007A89F5 /* DismissalProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE3B737325D92F63007A89F5 /* DismissalProtocols.swift */; };
 		BE96E2B3241E26AD0096CEE9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE96E2B2241E26AD0096CEE9 /* AppDelegate.swift */; };
 		BE96E2B5241E26AD0096CEE9 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE96E2B4241E26AD0096CEE9 /* SceneDelegate.swift */; };
 		BE96E2B7241E26AD0096CEE9 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE96E2B6241E26AD0096CEE9 /* ViewController.swift */; };
@@ -28,6 +29,7 @@
 		BE13C7DB24FCF14500547AD6 /* NavigationAnimator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NavigationAnimator.swift; sourceTree = "<group>"; };
 		BE13C7DD24FCF4CA00547AD6 /* NavigationInteractor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NavigationInteractor.swift; sourceTree = "<group>"; };
 		BE2E82FF25CBD3D100131C8C /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		BE3B737325D92F63007A89F5 /* DismissalProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DismissalProtocols.swift; sourceTree = "<group>"; };
 		BE96E2AF241E26AD0096CEE9 /* Drawer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Drawer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BE96E2B2241E26AD0096CEE9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		BE96E2B4241E26AD0096CEE9 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -77,6 +79,7 @@
 				BE96E2B2241E26AD0096CEE9 /* AppDelegate.swift */,
 				BE96E2B4241E26AD0096CEE9 /* SceneDelegate.swift */,
 				BEF55AED24B7791E005AE484 /* PresentationController.swift */,
+				BE3B737325D92F63007A89F5 /* DismissalProtocols.swift */,
 				BEF55AF124B7AAA9005AE484 /* PresentationAnimator.swift */,
 				BEF55AF324B87F3E005AE484 /* PresentationInteractor.swift */,
 				BE13C7DB24FCF14500547AD6 /* NavigationAnimator.swift */,
@@ -121,7 +124,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1120;
-				LastUpgradeCheck = 1210;
+				LastUpgradeCheck = 1240;
 				ORGANIZATIONNAME = "Ezenwa Okoro";
 				TargetAttributes = {
 					BE96E2AE241E26AD0096CEE9 = {
@@ -175,6 +178,7 @@
 				BE96E2B5241E26AD0096CEE9 /* SceneDelegate.swift in Sources */,
 				BEF55AEE24B7791F005AE484 /* PresentationController.swift in Sources */,
 				BEF55AF624BA2892005AE484 /* TableViewController.swift in Sources */,
+				BE3B737425D92F63007A89F5 /* DismissalProtocols.swift in Sources */,
 				BEF55AF224B7AAA9005AE484 /* PresentationAnimator.swift in Sources */,
 				BE2E830025CBD3D100131C8C /* Constants.swift in Sources */,
 			);

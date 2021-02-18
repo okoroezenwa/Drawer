@@ -8,12 +8,14 @@
 
 import UIKit
 
-class SecondViewController: UIViewController, ScrollViewDismissable {
+class SecondViewController: UIViewController, ScrollViewDismissable, StatusBarControlling {
     
     // MARK: - Storyboard Views
     
     @IBOutlet var navigationBar: UIVisualEffectView!
     @IBOutlet var titleLabel: UILabel!
+    @IBOutlet var fullScreenButton: UIButton!
+    @IBOutlet var bottomConstraint: NSLayoutConstraint!
     
     // MARK: - ScrollViewDismissable Conformance
     
@@ -25,6 +27,7 @@ class SecondViewController: UIViewController, ScrollViewDismissable {
     }
     
     var currentOffset = 0 as CGFloat
+    var preferredOffset: CGFloat { 84/* + (isFullScreen ? statusBarHeightValue(from: view) : 0)*/ }
     
     var scroller: UIScrollView? {
         
@@ -37,7 +40,7 @@ class SecondViewController: UIViewController, ScrollViewDismissable {
         
         guard let child = (children.first as? UINavigationController)?.topViewController as? TableViewController else { return true }
         
-        return child.tableView.contentOffset.y <= -84
+        return child.tableView.contentOffset.y <= -preferredOffset
     }
     
     var refreshControl: UIRefreshControl? {
@@ -54,6 +57,8 @@ class SecondViewController: UIViewController, ScrollViewDismissable {
         return { child.effectView?.transform = .identity }
     }
     
+    var isPresentedFullScreen: Bool { isFullScreen }
+    
     // MARK: - Other Variables
     
     var index = 0
@@ -61,8 +66,17 @@ class SecondViewController: UIViewController, ScrollViewDismissable {
     // MARK: - Presentation Variables
     
     lazy var presenter = PresentationManager(interactor: PresentationInteractor())
-    
+    var isFullScreen = useFullscreen
     let navigationPresenter = NavigationAnimator()
+    lazy var useLightStatusBar = isFullScreen {
+        
+        didSet {
+            
+            guard oldValue != useLightStatusBar else { return }
+            
+            UIView.animate(withDuration: 0.3, delay: 0, options: [.curveEaseInOut, .allowUserInteraction], animations: { self.setNeedsStatusBarAppearanceUpdate() })
+        }
+    }
     
     override var modalPresentationStyle: UIModalPresentationStyle {
         
@@ -78,18 +92,23 @@ class SecondViewController: UIViewController, ScrollViewDismissable {
         set { }
     }
     
+    override var preferredStatusBarStyle: UIStatusBarStyle { return useLightStatusBar ? .lightContent : .default }
+    
+//    override var modalPresentationCapturesStatusBarAppearance: Bool { return }
+    
     // MARK: - View Controller Methods
 
     override func viewDidLoad() {
         
         super.viewDidLoad()
         
+        modalPresentationCapturesStatusBarAppearance = true
         presenter.interactor.addToVC(self)
         index = numberOfControllers
         titleLabel.text = (numberOfControllers + 1).description
+        updateConstraint()
+        updateButton()
     }
-    
-    @IBAction func unwind(_ segue: UIStoryboardSegue) { }
     
     func scrollerDoesNotContainTouch(from gr: UIPanGestureRecognizer) -> Bool {
         
@@ -116,6 +135,16 @@ class SecondViewController: UIViewController, ScrollViewDismissable {
         return true
     }
     
+    func updateConstraint() {
+        
+        bottomConstraint.constant = 20 + cornerRadius//isFullScreen ? 0 : 20
+    }
+    
+    func updateButton() {
+        
+        fullScreenButton.setTitle(isFullScreen ? "Unfill Screen" : "Fill Screen", for: .normal)
+    }
+    
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         
         if segue.identifier == "embed", let navigationController = segue.destination as? UINavigationController {
@@ -124,6 +153,20 @@ class SecondViewController: UIViewController, ScrollViewDismissable {
             navigationPresenter.interactor.add(to: navigationController)
         }
     }
+    
+    @IBAction func updateScreenSize(_ sender: Any) {
+        
+        guard let controller = presentationController as? PresentationController, let child = (children.first as? UINavigationController)?.topViewController as? TableViewController else { return }
+        
+        isFullScreen.toggle()
+        
+        updateButton()
+        preferredContentSize = controller.frameOfPresentedViewInContainerView.size
+        useLightStatusBar = !isFullScreen
+        child.updateTopInsets(to: preferredOffset)
+    }
+    
+    @IBAction func unwind(_ segue: UIStoryboardSegue) { }
     
     override func canPerformUnwindSegueAction(_ action: Selector, from fromViewController: UIViewController, withSender sender: Any) -> Bool {
         
@@ -136,17 +179,3 @@ class SecondViewController: UIViewController, ScrollViewDismissable {
         return presentingViewController?.presentingViewController == nil && topViewController != self
     }
 }
-
-protocol ScrollViewDismissable: class {
-    
-    var gestureRecogniser: UIPanGestureRecognizer? { get }
-    var currentOffset: CGFloat { get set }
-    var scroller: UIScrollView? { get }
-    var refreshControl: UIRefreshControl? { get }
-    var isAtTop: Bool { get }
-    var presentationAnimation: (() -> ())? { get }
-    func scrollerDoesNotContainTouch(from gr: UIPanGestureRecognizer) -> Bool
-    func canBeginDismissal(with gr: UIPanGestureRecognizer) -> Bool
-    func scrollDirectionMatchesDismissal(via gr: UIPanGestureRecognizer) -> Bool
-}
-
