@@ -117,7 +117,7 @@ class PresentationInteractor: UIPercentDrivenInteractiveTransition {
                         vc.view.layer.cornerRadius = value
                     }
                 
-                    if let vc = viewController as? StatusBarControlling, let previous = presenter as? StatusBarControlling/*, previous is ViewController || (previous as? ScrollViewDismissable)?.isPresentedFullScreen == true*/ {
+                    if let vc = viewController as? StatusBarControlling, let previous = presenter as? StatusBarControlling {
                         
                         vc.useLightStatusBar = {
                             
@@ -230,7 +230,7 @@ class PresentationInteractor: UIPercentDrivenInteractiveTransition {
     
     func updateStatusBar(shouldCompleteTransition: Bool) {
         
-        if let vc = viewController as? StatusBarControlling, let previous = presenter as? StatusBarControlling/*, vc is ViewController || (vc as? ScrollViewDismissable)?.isPresentedFullScreen == true*/ {
+        if let vc = viewController as? StatusBarControlling, let previous = presenter as? StatusBarControlling {
             
             vc.useLightStatusBar = shouldCompleteTransition ? previous.useLightStatusBar : !(vc is ViewController || (vc as? ScrollViewDismissable)?.isPresentedFullScreen == true)
         }

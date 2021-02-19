@@ -27,6 +27,7 @@ class SecondViewController: UIViewController, ScrollViewDismissable, StatusBarCo
     }
     
     var currentOffset = 0 as CGFloat
+    #warning("Need to address disparity in older OSs")
     var preferredOffset: CGFloat { 84/* + (isFullScreen ? statusBarHeightValue(from: view) : 0)*/ }
     
     var scroller: UIScrollView? {
@@ -94,8 +95,6 @@ class SecondViewController: UIViewController, ScrollViewDismissable, StatusBarCo
     
     override var preferredStatusBarStyle: UIStatusBarStyle { return useLightStatusBar ? .lightContent : .default }
     
-//    override var modalPresentationCapturesStatusBarAppearance: Bool { return }
-    
     // MARK: - View Controller Methods
 
     override func viewDidLoad() {
@@ -137,7 +136,7 @@ class SecondViewController: UIViewController, ScrollViewDismissable, StatusBarCo
     
     func updateConstraint() {
         
-        bottomConstraint.constant = 20 + cornerRadius//isFullScreen ? 0 : 20
+        bottomConstraint.constant = 20 + cornerRadius
     }
     
     func updateButton() {
