@@ -64,7 +64,7 @@ class TableViewController: UIViewController {
             tableView.contentInset.bottom = 12 + effectViewHeight
         }
         
-        if animateBottomView {
+        if animateWithPresentation {
         
             effectView.transform = .init(translationX: 0, y: tableView.contentInset.bottom)
         }

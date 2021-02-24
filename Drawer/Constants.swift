@@ -34,11 +34,11 @@ var use3DTransforms: Bool {
     set { UserDefaults.standard.set(newValue, forKey: .use3DTransforms) }
 }
 
-var animateBottomView: Bool {
+var animateWithPresentation: Bool {
     
-    get { UserDefaults.standard.bool(forKey: .animateBottomView) }
+    get { UserDefaults.standard.bool(forKey: .animateWithPresentation) }
     
-    set { UserDefaults.standard.set(newValue, forKey: .animateBottomView) }
+    set { UserDefaults.standard.set(newValue, forKey: .animateWithPresentation) }
 }
 
 var rowCount: Int {
@@ -89,6 +89,6 @@ extension String {
     static var useRefreshControl = "useRefreshControl"
     static var use3DTransforms = "use3DTransforms"
     static var rowCount = "rowCount"
-    static var animateBottomView = "animateBottomView"
+    static var animateWithPresentation = "animateBottomView"
     static var useFullscreen = "useFullscreen"
 }

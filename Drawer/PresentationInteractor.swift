@@ -273,12 +273,27 @@ extension PresentationInteractor: UIGestureRecognizerDelegate {
     
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         
-        if gestureRecognizer is UIScreenEdgePanGestureRecognizer { return otherGestureRecognizer is UIScreenEdgePanGestureRecognizer }
+        var standardRecognition: Bool {
         
-        return gestureRecognizer is UIPanGestureRecognizer && otherGestureRecognizer == (viewController as? ScrollViewDismissable)?.gestureRecogniser
+            if gestureRecognizer is UIScreenEdgePanGestureRecognizer { return otherGestureRecognizer is UIScreenEdgePanGestureRecognizer }
+            
+            return gestureRecognizer is UIPanGestureRecognizer && otherGestureRecognizer == (viewController as? ScrollViewDismissable)?.gestureRecogniser
+        }
+        
+        if let vc = viewController as? ScrollViewDismissable, vc.gesturesToBeRecognised(with: gestureRecognizer).contains(otherGestureRecognizer) {
+            
+            return true
+        }
+        
+        return standardRecognition
     }
     
     func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        
+        if let vc = viewController as? ScrollViewDismissable {
+            
+            guard vc.allowRecognition(of: gestureRecognizer) else { return false }
+        }
         
         if let gr = gestureRecognizer as? UIPanGestureRecognizer, !(gr is UIScreenEdgePanGestureRecognizer), let vc = viewController as? ScrollViewDismissable {
             
@@ -310,7 +325,10 @@ extension PresentationInteractor: UIGestureRecognizerDelegate {
     
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldBeRequiredToFailBy otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         
-        if gestureRecognizer is UIScreenEdgePanGestureRecognizer, let vc = viewController as? ScrollViewDismissable { return vc.scroller?.panGestureRecognizer == otherGestureRecognizer }
+        if gestureRecognizer is UIScreenEdgePanGestureRecognizer, let vc = viewController as? ScrollViewDismissable {
+            
+            return vc.scroller?.panGestureRecognizer == otherGestureRecognizer
+        }
         
         return false
     }

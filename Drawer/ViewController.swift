@@ -44,7 +44,7 @@ class ViewController: UIViewController, StatusBarControlling {
         transformSwitch.isOn = use3DTransforms
         transformSwitch.addTarget(self, action: #selector(toggleSwitches(_:)), for: .valueChanged)
         
-        animateSwitch.isOn = animateBottomView
+        animateSwitch.isOn = animateWithPresentation
         animateSwitch.addTarget(self, action: #selector(toggleSwitches(_:)), for: .valueChanged)
         
         fullscreenSwitch.isOn = useFullscreen
@@ -69,7 +69,7 @@ class ViewController: UIViewController, StatusBarControlling {
                 
             case transformSwitch: use3DTransforms.toggle()
                 
-            case animateSwitch: animateBottomView.toggle()
+            case animateSwitch: animateWithPresentation.toggle()
                 
             case fullscreenSwitch: useFullscreen.toggle()
                 

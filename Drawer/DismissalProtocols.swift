@@ -10,20 +10,48 @@ import UIKit
 
 protocol ScrollViewDismissable: class {
     
+    /// The gesture recogniser, if any, that will work in tandem with the dismissal gesture recogniser.
     var gestureRecogniser: UIPanGestureRecognizer? { get }
+    
+    /// The minimum offset the scroll view should typically maintain while a dismissal is active.
     var preferredOffset: CGFloat { get }
+    
+    /// The current offset the scrollview is at during a dismissal.
     var currentOffset: CGFloat { get set }
+    
+    /// The scroll view, if any, that needs to have scroll functionality maintained during the transition.
     var scroller: UIScrollView? { get }
+    
+    /// The refresh control, if any, attached to the participating scroll view. If a refresh control is present, dismissal is non-interactive and requires a harder swipe to be invoked.
     var refreshControl: UIRefreshControl? { get }
+    
+    /// Whether the dismissal attempt begins while the scroll view is at its start point.
     var isAtTop: Bool { get }
+    
+    /// The animation block, if any, that should follow a presentation.
     var presentationAnimation: (() -> ())? { get }
+    
+    /// Whether the presented view controller uses the full screen dimensions or is presented as a card.
     var isPresentedFullScreen: Bool { get }
+    
+    /// Whether the scroll view does not contain the current touch. If `true`, the dismissal begins immediately.
     func scrollerDoesNotContainTouch(from gr: UIPanGestureRecognizer) -> Bool
+    
+    /// Whether the dismissal can begin.
     func canBeginDismissal(with gr: UIPanGestureRecognizer) -> Bool
+    
+    /// Whether the direction currently being scrolled on the scroll view matches the dismissal gesture direction.
     func scrollDirectionMatchesDismissal(via gr: UIPanGestureRecognizer) -> Bool
+    
+    /// Whether the given gesture recogniser should be recognised.
+    func allowRecognition(of gr: UIGestureRecognizer) -> Bool
+    
+    /// Any further gestures that should be simultaneously recognised alongside the dismissal gestures
+    func gesturesToBeRecognised(with gr: UIGestureRecognizer) -> Set<UIGestureRecognizer>
 }
 
 protocol StatusBarControlling: class {
     
+    /// Whether a `lightContent` status bar should be used, otherwise the default for the view controller will be used.
     var useLightStatusBar: Bool { get set }
 }

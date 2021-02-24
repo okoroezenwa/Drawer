@@ -92,7 +92,7 @@ class PresentationController: UIPresentationController {
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1, execute: { // risky, but it gives me what I want
             
-            if animateBottomView, let dismissable = self.presentedViewController as? ScrollViewDismissable, let animation = dismissable.presentationAnimation {
+            if animateWithPresentation, let dismissable = self.presentedViewController as? ScrollViewDismissable, let animation = dismissable.presentationAnimation {
 
                 UIView.animate(withDuration: 0.8, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0, options: [.allowUserInteraction, .curveEaseOut], animations: animation, completion: nil)
             }
@@ -365,7 +365,7 @@ class PresentationController: UIPresentationController {
             return statusBarHeight + 20
         }
         
-        return .init(width: parentSize.width, height: parentSize.height - difference + 20 + cornerRadius) // added 20 takes care of swiping up instead of down during dismissal
+        return .init(width: parentSize.width, height: parentSize.height - difference + 20 + cornerRadius) // `20 + cornerRadius` takes care of swiping up instead of down during dismissal
     }
     
     override func preferredContentSizeDidChange(forChildContentContainer container: UIContentContainer) {

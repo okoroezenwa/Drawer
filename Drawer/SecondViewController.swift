@@ -15,7 +15,13 @@ class SecondViewController: UIViewController, ScrollViewDismissable, StatusBarCo
     @IBOutlet var navigationBar: UIVisualEffectView!
     @IBOutlet var titleLabel: UILabel!
     @IBOutlet var fullScreenButton: UIButton!
-    @IBOutlet var bottomConstraint: NSLayoutConstraint!
+    @IBOutlet var bottomConstraint: NSLayoutConstraint! {
+        
+        didSet {
+            
+            bottomConstraint.constant = 20 + cornerRadius
+        }
+    }
     
     // MARK: - ScrollViewDismissable Conformance
     
@@ -28,7 +34,7 @@ class SecondViewController: UIViewController, ScrollViewDismissable, StatusBarCo
     
     var currentOffset = 0 as CGFloat
     #warning("Need to address disparity in older OSs")
-    var preferredOffset: CGFloat { 84/* + (isFullScreen ? statusBarHeightValue(from: view) : 0)*/ }
+    var preferredOffset: CGFloat { 84 }
     
     var scroller: UIScrollView? {
         
@@ -36,6 +42,8 @@ class SecondViewController: UIViewController, ScrollViewDismissable, StatusBarCo
         
         return child.tableView
     }
+    
+    var viewBottomConstraint: NSLayoutConstraint? { bottomConstraint }
     
     var isAtTop: Bool {
         
@@ -101,42 +109,12 @@ class SecondViewController: UIViewController, ScrollViewDismissable, StatusBarCo
         
         super.viewDidLoad()
         
+        automaticallyAdjustsScrollViewInsets = false
         modalPresentationCapturesStatusBarAppearance = true
         presenter.interactor.addToVC(self)
         index = numberOfControllers
         titleLabel.text = (numberOfControllers + 1).description
-        updateConstraint()
         updateButton()
-    }
-    
-    func scrollerDoesNotContainTouch(from gr: UIPanGestureRecognizer) -> Bool {
-        
-        return navigationBar.frame.contains(gr.location(in: view))
-    }
-    
-    func scrollDirectionMatchesDismissal(via gr: UIPanGestureRecognizer) -> Bool {
-        
-        gr.translation(in: gr.view).y > 0
-    }
-    
-    func canBeginDismissal(with gr: UIPanGestureRecognizer) -> Bool {
-        
-        if scrollerDoesNotContainTouch(from: gr) {
-            
-            return true
-        }
-    
-        if let _ = scroller {
-            
-            return isAtTop && scrollDirectionMatchesDismissal(via: gr)
-        }
-        
-        return true
-    }
-    
-    func updateConstraint() {
-        
-        bottomConstraint.constant = 20 + cornerRadius
     }
     
     func updateButton() {
@@ -176,5 +154,43 @@ class SecondViewController: UIViewController, ScrollViewDismissable, StatusBarCo
     override func canPerformUnwindSegueAction(_ action: Selector, from fromViewController: UIViewController, sender: Any?) -> Bool {
         
         return presentingViewController?.presentingViewController == nil && topViewController != self
+    }
+}
+
+extension SecondViewController {
+    
+    func scrollerDoesNotContainTouch(from gr: UIPanGestureRecognizer) -> Bool {
+        
+        return navigationBar.frame.contains(gr.location(in: view))
+    }
+    
+    func scrollDirectionMatchesDismissal(via gr: UIPanGestureRecognizer) -> Bool {
+        
+        gr.translation(in: gr.view).y > 0
+    }
+    
+    func canBeginDismissal(with gr: UIPanGestureRecognizer) -> Bool {
+        
+        if scrollerDoesNotContainTouch(from: gr) {
+            
+            return true
+        }
+    
+        if let _ = scroller {
+            
+            return isAtTop && scrollDirectionMatchesDismissal(via: gr)
+        }
+        
+        return true
+    }
+    
+    func allowRecognition(of gr: UIGestureRecognizer) -> Bool {
+        
+        true
+    }
+    
+    func gesturesToBeRecognised(with gr: UIGestureRecognizer) -> Set<UIGestureRecognizer> {
+        
+        []
     }
 }

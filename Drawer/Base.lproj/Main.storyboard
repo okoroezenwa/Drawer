@@ -221,7 +221,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <containerView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Kca-qc-bV7">
-                                <rect key="frame" x="0.0" y="0.0" width="375" height="627"/>
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="647"/>
                                 <connections>
                                     <segue destination="809-uZ-prh" kind="embed" identifier="embed" id="VkG-6h-YeN"/>
                                 </connections>
@@ -296,7 +296,7 @@
                             <constraint firstItem="Kca-qc-bV7" firstAttribute="top" secondItem="I4k-8L-iOO" secondAttribute="top" id="Djv-M6-fmi"/>
                             <constraint firstItem="aCo-cH-cFb" firstAttribute="top" secondItem="pRQ-LS-tMf" secondAttribute="top" constant="40" id="ZjD-a9-6Ef"/>
                             <constraint firstItem="pRQ-LS-tMf" firstAttribute="trailing" secondItem="WSX-3u-mYd" secondAttribute="trailing" id="a1e-oT-teV"/>
-                            <constraint firstAttribute="bottom" secondItem="Kca-qc-bV7" secondAttribute="bottom" constant="20" id="zX8-k4-D24"/>
+                            <constraint firstAttribute="bottom" secondItem="Kca-qc-bV7" secondAttribute="bottom" id="zX8-k4-D24"/>
                         </constraints>
                     </view>
                     <connections>
@@ -315,11 +315,11 @@
             <objects>
                 <viewController storyboardIdentifier="TableViewController" id="Q2J-RG-3O6" customClass="TableViewController" customModule="Drawer" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="a7K-e7-32L">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="627"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="647"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="s4E-T1-BJF">
-                                <rect key="frame" x="0.0" y="0.0" width="375" height="627"/>
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="647"/>
                                 <color key="backgroundColor" systemColor="systemGroupedBackgroundColor"/>
                                 <connections>
                                     <outlet property="dataSource" destination="Q2J-RG-3O6" id="Ib1-iB-4o0"/>
@@ -327,7 +327,7 @@
                                 </connections>
                             </tableView>
                             <visualEffectView opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="V63-0R-KM7">
-                                <rect key="frame" x="12" y="561" width="351" height="54"/>
+                                <rect key="frame" x="12" y="581" width="351" height="54"/>
                                 <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="VWF-AJ-6Cq">
                                     <rect key="frame" x="0.0" y="0.0" width="351" height="54"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -356,7 +356,7 @@
                                                             <gestureRecognizers/>
                                                             <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="17"/>
                                                             <color key="tintColor" systemColor="labelColor"/>
-                                                            <state key="normal" image="minus" catalog="system"/>
+                                                            <state key="normal" image="Down"/>
                                                             <connections>
                                                                 <action selector="changeCount:" destination="Q2J-RG-3O6" eventType="touchUpInside" id="cOy-1j-ctr"/>
                                                             </connections>
@@ -372,7 +372,7 @@
                                                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                             <gestureRecognizers/>
                                                             <color key="tintColor" systemColor="labelColor"/>
-                                                            <state key="normal" image="plus" catalog="system"/>
+                                                            <state key="normal" image="Up"/>
                                                             <connections>
                                                                 <action selector="changeCount:" destination="Q2J-RG-3O6" eventType="touchUpInside" id="mIg-6e-8sW"/>
                                                             </connections>
@@ -476,8 +476,8 @@
         <segue reference="omn-7d-u8h"/>
     </inferredMetricsTieBreakers>
     <resources>
-        <image name="minus" catalog="system" width="128" height="24"/>
-        <image name="plus" catalog="system" width="128" height="113"/>
+        <image name="Down" width="14" height="8"/>
+        <image name="Up" width="14" height="8"/>
         <systemColor name="groupTableViewBackgroundColor">
             <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
