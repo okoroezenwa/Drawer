@@ -180,6 +180,8 @@ class PresentationController: UIPresentationController {
             
             if #available(iOS 11, *) { } else { presenter.view.layer.removeAllAnimations() }
         }
+        
+        (presentedViewController as? ScrollViewDismissable)?.presentationCompletion(completed)
     }
     
     override func dismissalTransitionWillBegin() {
@@ -292,6 +294,8 @@ class PresentationController: UIPresentationController {
 
             vc.useLightStatusBar = (vc as? ScrollViewDismissable)?.isPresentedFullScreen == false
         }
+        
+        (presentedViewController as? ScrollViewDismissable)?.presentationCompletion(completed)
     }
     
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {

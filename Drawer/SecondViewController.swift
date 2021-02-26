@@ -43,8 +43,6 @@ class SecondViewController: UIViewController, ScrollViewDismissable, StatusBarCo
         return child.tableView
     }
     
-    var viewBottomConstraint: NSLayoutConstraint? { bottomConstraint }
-    
     var isAtTop: Bool {
         
         guard let child = (children.first as? UINavigationController)?.topViewController as? TableViewController else { return true }
@@ -76,6 +74,7 @@ class SecondViewController: UIViewController, ScrollViewDismissable, StatusBarCo
     
     lazy var presenter = PresentationManager(interactor: PresentationInteractor())
     var isFullScreen = useFullscreen
+    var useAlternateAnimation = false
     let navigationPresenter = NavigationAnimator()
     lazy var useLightStatusBar = isFullScreen {
         
@@ -164,33 +163,15 @@ extension SecondViewController {
         return navigationBar.frame.contains(gr.location(in: view))
     }
     
-    func scrollDirectionMatchesDismissal(via gr: UIPanGestureRecognizer) -> Bool {
+    func animation(for controller: UIViewController, at state: PresentationAnimator.State) -> (() -> ())? {
         
-        gr.translation(in: gr.view).y > 0
-    }
-    
-    func canBeginDismissal(with gr: UIPanGestureRecognizer) -> Bool {
+        guard let coordinator = transitionCoordinator, !coordinator.isInteractive, state == .dismissal, isFullScreen, useAlternateAnimation else { return nil }
         
-        if scrollerDoesNotContainTouch(from: gr) {
+        return {
             
-            return true
+            let value = 1.4 as CGFloat
+            controller.view.transform = .init(scaleX: value, y: value)
+            controller.view.alpha = 0
         }
-    
-        if let _ = scroller {
-            
-            return isAtTop && scrollDirectionMatchesDismissal(via: gr)
-        }
-        
-        return true
-    }
-    
-    func allowRecognition(of gr: UIGestureRecognizer) -> Bool {
-        
-        true
-    }
-    
-    func gesturesToBeRecognised(with gr: UIGestureRecognizer) -> Set<UIGestureRecognizer> {
-        
-        []
     }
 }

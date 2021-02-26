@@ -120,6 +120,11 @@ class TableViewController: UIViewController {
     
     @IBAction func dismiss(_ sender: UIButton) {
         
+        if let parent = (parent as? UINavigationController)?.parent as? SecondViewController {
+            
+            parent.useAlternateAnimation = true
+        }
+        
         dismiss(animated: true, completion: nil)
     }
     

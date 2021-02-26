@@ -48,7 +48,7 @@ class PresentationAnimator: NSObject, UIViewControllerAnimatedTransitioning {
         let duration = transitionDuration(using: transitionContext)
         controller.view.frame = initialFrame
         
-        let animations = { controller.view.frame = finalFrame }
+        let animations = (controller as? ScrollViewDismissable)?.animation(for: controller, at: state) ?? { controller.view.frame = finalFrame }
         let completion: (Bool) -> Void = { finished in
             
             if !isPresentation, !transitionContext.transitionWasCancelled {

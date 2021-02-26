@@ -43,15 +43,78 @@ protocol ScrollViewDismissable: class {
     /// Whether the direction currently being scrolled on the scroll view matches the dismissal gesture direction.
     func scrollDirectionMatchesDismissal(via gr: UIPanGestureRecognizer) -> Bool
     
-    /// Whether the given gesture recogniser should be recognised.
+    /// Whether the given dismissal gesture recogniser should be recognised.
     func allowRecognition(of gr: UIGestureRecognizer) -> Bool
     
     /// Any further gestures that should be simultaneously recognised alongside the dismissal gestures
     func gesturesToBeRecognised(with gr: UIGestureRecognizer) -> Set<UIGestureRecognizer>
+    
+    /// The animation to use for the presentation and/or dismissal of the presented view controller. If `nil`, the standard bottom-up slide animation is used.
+    func animation(for controller: UIViewController, at state: PresentationAnimator.State) -> (() -> ())?
+    
+    /// Any completion that needs to occur after presentation.
+    func presentationCompletion(_ completed: Bool)
+    
+    /// Any completion that needs to occur after dismissal.
+    func dismissalCompletion(_ completed: Bool)
 }
 
 protocol StatusBarControlling: class {
     
     /// Whether a `lightContent` status bar should be used, otherwise the default for the view controller will be used.
     var useLightStatusBar: Bool { get set }
+}
+
+extension ScrollViewDismissable {
+    
+    var presentationAnimation: (() -> ())? {
+        
+        nil
+    }
+    
+    var isPresentedFullScreen: Bool { false }
+    
+    var refreshControl: UIRefreshControl? {
+        
+        nil
+    }
+    
+    func animation(for controller: UIViewController, at state: PresentationAnimator.State) -> (() -> ())? {
+        
+        nil
+    }
+    
+    func scrollDirectionMatchesDismissal(via gr: UIPanGestureRecognizer) -> Bool {
+        
+        gr.translation(in: gr.view).y > 0
+    }
+    
+    func canBeginDismissal(with gr: UIPanGestureRecognizer) -> Bool {
+        
+        if scrollerDoesNotContainTouch(from: gr) {
+            
+            return true
+        }
+    
+        if let _ = scroller {
+            
+            return isAtTop && scrollDirectionMatchesDismissal(via: gr)
+        }
+        
+        return true
+    }
+    
+    func allowRecognition(of gr: UIGestureRecognizer) -> Bool {
+        
+        true
+    }
+    
+    func gesturesToBeRecognised(with gr: UIGestureRecognizer) -> Set<UIGestureRecognizer> {
+        
+        []
+    }
+    
+    func presentationCompletion(_ completed: Bool) {  }
+    
+    func dismissalCompletion(_ completed: Bool) {  }
 }
