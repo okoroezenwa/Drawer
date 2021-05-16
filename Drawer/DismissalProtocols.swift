@@ -8,7 +8,7 @@
 
 import UIKit
 
-protocol ScrollViewDismissable: class {
+protocol ScrollViewDismissable: ViewControllerOperationAttaching {
     
     /// The gesture recogniser, if any, that will work in tandem with the dismissal gesture recogniser.
     var gestureRecogniser: UIPanGestureRecognizer? { get }
@@ -34,6 +34,9 @@ protocol ScrollViewDismissable: class {
     /// Whether the presented view controller uses the full screen dimensions or is presented as a card.
     var isPresentedFullScreen: Bool { get }
     
+    /// Whether snapshots of the presenting view controller should be placed behind the presented view controller. This is useful for blurred backgrounds.
+    var shouldUseBackingSnapshots: Bool { get }
+    
     /// Whether the scroll view does not contain the current touch. If `true`, the dismissal begins immediately.
     func scrollerDoesNotContainTouch(from gr: UIPanGestureRecognizer) -> Bool
     
@@ -46,25 +49,41 @@ protocol ScrollViewDismissable: class {
     /// Whether the given dismissal gesture recogniser should be recognised.
     func allowRecognition(of gr: UIGestureRecognizer) -> Bool
     
-    /// Any further gestures that should be simultaneously recognised alongside the dismissal gestures
+    /// Any further gestures that should be simultaneously recognised alongside the dismissal gestures.
     func gesturesToBeRecognised(with gr: UIGestureRecognizer) -> Set<UIGestureRecognizer>
     
     /// The animation to use for the presentation and/or dismissal of the presented view controller. If `nil`, the standard bottom-up slide animation is used.
     func animation(for controller: UIViewController, at state: PresentationAnimator.State) -> (() -> ())?
-    
-    /// Any completion that needs to occur after presentation.
-    func presentationCompletion(_ completed: Bool)
-    
-    /// Any completion that needs to occur after dismissal.
-    func dismissalCompletion(_ completed: Bool)
 }
 
-protocol StatusBarControlling: class {
+protocol StatusBarControlling: AnyObject {
     
     /// Whether a `lightContent` status bar should be used, otherwise the default for the view controller will be used.
     var useLightStatusBar: Bool { get set }
 }
 
+protocol ViewControllerOperationAttaching: AnyObject {
+    
+    /// Any preparations that need to be made before presenting the view controller.
+    func presentationPreparation()
+    
+    /// Any animations that should occur alongside the presentation transition.
+    func complementaryPresentationAnimation()
+    
+    /// Any completion that needs to occur after presentation.
+    func presentationCompletion(_ completed: Bool)
+    
+    /// Any preparations that need to be made before dimissing the view controller.
+    func dismissalPreparation()
+    
+    /// Any animations that should occur alongside the dismissal transition.
+    func complementaryDismissalAnimation()
+    
+    /// Any completion that needs to occur after dismissal.
+    func dismissalCompletion(_ completed: Bool)
+}
+
+// Default implementations of a few of the protocol properties and methods
 extension ScrollViewDismissable {
     
     var presentationAnimation: (() -> ())? {
@@ -78,6 +97,8 @@ extension ScrollViewDismissable {
         
         nil
     }
+    
+    var shouldUseBackingSnapshots: Bool { false }
     
     func animation(for controller: UIViewController, at state: PresentationAnimator.State) -> (() -> ())? {
         
@@ -113,8 +134,19 @@ extension ScrollViewDismissable {
         
         []
     }
+}
+
+extension ViewControllerOperationAttaching {
+    
+    func presentationPreparation() {  }
+    
+    func complementaryPresentationAnimation() {  }
     
     func presentationCompletion(_ completed: Bool) {  }
+    
+    func dismissalPreparation() {  }
+    
+    func complementaryDismissalAnimation() {  }
     
     func dismissalCompletion(_ completed: Bool) {  }
 }

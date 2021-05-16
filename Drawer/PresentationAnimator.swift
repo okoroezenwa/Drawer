@@ -23,7 +23,7 @@ class PresentationAnimator: NSObject, UIViewControllerAnimatedTransitioning {
 
     func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
         
-        state == .presentation || transitionContext?.isInteractive ?? false ? 0.45 : 0.55
+        state == .presentation || transitionContext?.isInteractive == true ? 0.45 : 0.55
     }
     
     func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {

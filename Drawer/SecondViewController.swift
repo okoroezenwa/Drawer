@@ -19,7 +19,7 @@ class SecondViewController: UIViewController, ScrollViewDismissable, StatusBarCo
         
         didSet {
             
-            bottomConstraint.constant = 20 + cornerRadius
+            bottomConstraint.constant = 20 + DrawerConstants.cornerRadius
         }
     }
     
@@ -74,7 +74,6 @@ class SecondViewController: UIViewController, ScrollViewDismissable, StatusBarCo
     
     lazy var presenter = PresentationManager(interactor: PresentationInteractor())
     var isFullScreen = useFullscreen
-    var useAlternateAnimation = false
     let navigationPresenter = NavigationAnimator()
     lazy var useLightStatusBar = isFullScreen {
         
@@ -111,8 +110,8 @@ class SecondViewController: UIViewController, ScrollViewDismissable, StatusBarCo
         automaticallyAdjustsScrollViewInsets = false
         modalPresentationCapturesStatusBarAppearance = true
         presenter.interactor.addToVC(self)
-        index = numberOfControllers
-        titleLabel.text = (numberOfControllers + 1).description
+        index = DrawerConstants.numberOfControllers
+        titleLabel.text = (DrawerConstants.numberOfControllers + 1).description
         updateButton()
     }
     
@@ -146,13 +145,13 @@ class SecondViewController: UIViewController, ScrollViewDismissable, StatusBarCo
     
     override func canPerformUnwindSegueAction(_ action: Selector, from fromViewController: UIViewController, withSender sender: Any) -> Bool {
         
-        return presentingViewController?.presentingViewController == nil && topViewController != self
+        return presentingViewController?.presentingViewController == nil && DrawerConstants.topViewController != self
     }
     
     @available(iOS 13, *)
     override func canPerformUnwindSegueAction(_ action: Selector, from fromViewController: UIViewController, sender: Any?) -> Bool {
         
-        return presentingViewController?.presentingViewController == nil && topViewController != self
+        return presentingViewController?.presentingViewController == nil && DrawerConstants.topViewController != self
     }
 }
 
@@ -161,17 +160,5 @@ extension SecondViewController {
     func scrollerDoesNotContainTouch(from gr: UIPanGestureRecognizer) -> Bool {
         
         return navigationBar.frame.contains(gr.location(in: view))
-    }
-    
-    func animation(for controller: UIViewController, at state: PresentationAnimator.State) -> (() -> ())? {
-        
-        guard let coordinator = transitionCoordinator, !coordinator.isInteractive, state == .dismissal, isFullScreen, useAlternateAnimation else { return nil }
-        
-        return {
-            
-            let value = 1.4 as CGFloat
-            controller.view.transform = .init(scaleX: value, y: value)
-            controller.view.alpha = 0
-        }
     }
 }

@@ -21,7 +21,7 @@ class PresentationInteractor: UIPercentDrivenInteractiveTransition {
     @objc func addToVC(_ vc: UIViewController) {
         
         viewController = vc
-        presenter = previousDismissableViewController(from: viewController?.presentingViewController) ?? root
+        presenter = previousDismissableViewController(from: viewController?.presentingViewController) ?? DrawerConstants.root
         
         let leftEdge = UIScreenEdgePanGestureRecognizer(target: self, action: #selector(handleGesture))
         leftEdge.edges = .left
@@ -35,6 +35,7 @@ class PresentationInteractor: UIPercentDrivenInteractiveTransition {
         
         let pan = UIPanGestureRecognizer.init(target: self, action: #selector(handleGesture))
         pan.delegate = self
+//        pan.cancelsTouchesInView = false
         viewController?.view.addGestureRecognizer(pan)
     }
     
@@ -44,7 +45,7 @@ class PresentationInteractor: UIPercentDrivenInteractiveTransition {
         
         let translation = gr.translation(in: gr.view)
         let velocity = gr.velocity(in: gr.view)
-        let initialProgress = translation.y / (viewController.view.bounds.height - 20 - cornerRadius)
+        let initialProgress = translation.y / (viewController.view.bounds.height - 20 - DrawerConstants.cornerRadius)
         let progress: CGFloat = {
             
             if !(gr is UIScreenEdgePanGestureRecognizer), let vc = viewController as? ScrollViewDismissable, let _ = vc.scroller, vc.scrollDirectionMatchesDismissal(via: gr), vc.refreshControl != nil, scrollBeganFromScroller { return 0 }
@@ -64,7 +65,7 @@ class PresentationInteractor: UIPercentDrivenInteractiveTransition {
                     viewController.dismiss(animated: true, completion: nil)
                 }
             
-                startPoint = gr.location(in: appDelegate.window).y
+                startPoint = gr.location(in: DrawerConstants.appDelegate.window).y
                 
             case .changed:
                 
@@ -102,7 +103,7 @@ class PresentationInteractor: UIPercentDrivenInteractiveTransition {
                             
                             scroller.contentOffset.y = scroller.contentOffset.y
                             
-                            let location = gr.location(in: appDelegate.window).y
+                            let location = gr.location(in: DrawerConstants.appDelegate.window).y
                             let progress = (startPoint - location) / startPoint
                             
                             viewController.view.transform = .init(translationX: 0, y: -progress * (progress - 2) * -20)
@@ -113,7 +114,7 @@ class PresentationInteractor: UIPercentDrivenInteractiveTransition {
                     
                     if #available(iOS 11, *) { } else if let vc = presenter as? ViewController {
                         
-                        let value = cornerRadius - (progress * cornerRadius)
+                        let value = DrawerConstants.cornerRadius - (progress * DrawerConstants.cornerRadius)
                         vc.view.layer.cornerRadius = value
                     }
                 
@@ -121,7 +122,7 @@ class PresentationInteractor: UIPercentDrivenInteractiveTransition {
                         
                         vc.useLightStatusBar = {
                             
-                            let point = 14 / (viewController.view.bounds.height - 20 - cornerRadius)
+                            let point = 14 / (viewController.view.bounds.height - 20 - DrawerConstants.cornerRadius)
                             
                             switch progress {
                                 
@@ -225,7 +226,7 @@ class PresentationInteractor: UIPercentDrivenInteractiveTransition {
         
         guard let controller = presenter, controller is ViewController else { return }
             
-        controller.view.layer.animate(#keyPath(CALayer.cornerRadius), from: controller.view.layer.cornerRadius, to: shouldCompleteTransition ? 0 : cornerRadius, duration: TimeInterval((percentComplete * duration) / completionSpeed), timingFunctionName: .linear)
+        controller.view.layer.animate(#keyPath(CALayer.cornerRadius), from: controller.view.layer.cornerRadius, to: shouldCompleteTransition ? 0 : DrawerConstants.cornerRadius, duration: TimeInterval((percentComplete * duration) / completionSpeed), timingFunctionName: .linear)
     }
     
     func updateStatusBar(shouldCompleteTransition: Bool) {
@@ -320,7 +321,7 @@ extension PresentationInteractor: UIGestureRecognizerDelegate {
         
         if gestureRecognizer is UIScreenEdgePanGestureRecognizer { return false }
         
-        return otherGestureRecognizer is UIScreenEdgePanGestureRecognizer
+        return otherGestureRecognizer is UIScreenEdgePanGestureRecognizer || otherGestureRecognizer is UISwipeGestureRecognizer
     }
     
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldBeRequiredToFailBy otherGestureRecognizer: UIGestureRecognizer) -> Bool {

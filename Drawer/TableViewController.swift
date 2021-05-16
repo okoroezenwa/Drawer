@@ -43,7 +43,7 @@ class TableViewController: UIViewController {
         
         let effectViewHeight = 54 as CGFloat
         
-        if #available(iOS 11, *), let inset = appDelegate.window?.rootViewController?.view.safeAreaInsets.bottom {
+        if #available(iOS 11, *), let inset = DrawerConstants.appDelegate.window?.rootViewController?.view.safeAreaInsets.bottom {
             
             let bottomConstant = inset == 0 ? 12 : inset
             effectViewBottomConstraint.constant = bottomConstant
@@ -119,11 +119,6 @@ class TableViewController: UIViewController {
     }
     
     @IBAction func dismiss(_ sender: UIButton) {
-        
-        if let parent = (parent as? UINavigationController)?.parent as? SecondViewController {
-            
-            parent.useAlternateAnimation = true
-        }
         
         dismiss(animated: true, completion: nil)
     }

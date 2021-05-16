@@ -9,9 +9,6 @@
 import UIKit
 
 typealias DismissableViewController = UIViewController & ScrollViewDismissable
-var root: ViewController? { appDelegate.window?.rootViewController as? ViewController }
-var topViewController: UIViewController? { return topVC(startingFrom: appDelegate.window?.rootViewController) }
-let appDelegate = UIApplication.shared.delegate as! AppDelegate
 
 var presentScrollable: Bool {
     
@@ -71,18 +68,6 @@ func rootOfPresentedViewController(from viewController: UIViewController?) -> UI
     return rootOfPresentedViewController(from: viewController?.parent)
 }
 
-func topVC(startingFrom vc: UIViewController? = topViewController) -> UIViewController? {
-    
-    if let presented = vc?.presentedViewController {
-        
-        return topVC(startingFrom: presented)
-        
-    } else {
-        
-        return vc
-    }
-}
-
 extension String {
     
     static var presentScrollable = "presentScrollable"
@@ -91,4 +76,25 @@ extension String {
     static var rowCount = "rowCount"
     static var animateWithPresentation = "animateBottomView"
     static var useFullscreen = "useFullscreen"
+}
+
+struct DrawerConstants {
+    
+    static let cornerRadius = 12 as CGFloat
+    static var numberOfControllers = 0
+    static var root: ViewController? { appDelegate.window?.rootViewController as? ViewController }
+    static var topViewController: UIViewController? { return topVC(startingFrom: appDelegate.window?.rootViewController) }
+    static let appDelegate = UIApplication.shared.delegate as! AppDelegate
+    
+    static func topVC(startingFrom vc: UIViewController? = topViewController) -> UIViewController? {
+        
+        if let presented = vc?.presentedViewController {
+            
+            return topVC(startingFrom: presented)
+            
+        } else {
+            
+            return vc
+        }
+    }
 }
