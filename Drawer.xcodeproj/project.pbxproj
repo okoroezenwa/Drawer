@@ -78,8 +78,8 @@
 			children = (
 				BE96E2B2241E26AD0096CEE9 /* AppDelegate.swift */,
 				BE96E2B4241E26AD0096CEE9 /* SceneDelegate.swift */,
-				BEF55AED24B7791E005AE484 /* PresentationController.swift */,
 				BE3B737325D92F63007A89F5 /* DismissalProtocols.swift */,
+				BEF55AED24B7791E005AE484 /* PresentationController.swift */,
 				BEF55AF124B7AAA9005AE484 /* PresentationAnimator.swift */,
 				BEF55AF324B87F3E005AE484 /* PresentationInteractor.swift */,
 				BE13C7DB24FCF14500547AD6 /* NavigationAnimator.swift */,
@@ -124,7 +124,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1120;
-				LastUpgradeCheck = 1240;
+				LastUpgradeCheck = 1320;
 				ORGANIZATIONNAME = "Ezenwa Okoro";
 				TargetAttributes = {
 					BE96E2AE241E26AD0096CEE9 = {
@@ -326,7 +326,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = P75398C8MB;
 				INFOPLIST_FILE = Drawer/Info.plist;
@@ -347,7 +347,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = P75398C8MB;
 				INFOPLIST_FILE = Drawer/Info.plist;

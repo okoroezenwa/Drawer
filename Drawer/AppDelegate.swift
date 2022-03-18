@@ -24,7 +24,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                         .rowCount: 20,
                         .use3DTransforms: {
                             
-                            if #available(iOS 14, *) { return true }
+                            if #available(iOS 12, *) { return true }
                             
                             return false
                         }()

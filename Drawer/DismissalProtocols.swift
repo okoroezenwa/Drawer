@@ -10,6 +10,9 @@ import UIKit
 
 protocol ScrollViewDismissable: ViewControllerOperationAttaching {
     
+    /// Whether the current user interface style is a dark theme.
+//    var isDarkUserInterfaceStyle: Bool { get }
+    
     /// The gesture recogniser, if any, that will work in tandem with the dismissal gesture recogniser.
     var gestureRecogniser: UIPanGestureRecognizer? { get }
     
@@ -64,6 +67,9 @@ protocol StatusBarControlling: AnyObject {
 
 protocol ViewControllerOperationAttaching: AnyObject {
     
+    /// The view whose background will be modified during presentation/dismissal.
+//    var backgroundView: UIView? { get }
+    
     /// Any preparations that need to be made before presenting the view controller.
     func presentationPreparation()
     
@@ -81,6 +87,11 @@ protocol ViewControllerOperationAttaching: AnyObject {
     
     /// Any completion that needs to occur after dismissal.
     func dismissalCompletion(_ completed: Bool)
+}
+
+extension ViewControllerOperationAttaching {
+    
+//    var backgroundView: UIView? { (self as? UIViewController)?.view }
 }
 
 // Default implementations of a few of the protocol properties and methods

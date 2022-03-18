@@ -141,18 +141,18 @@ class SecondViewController: UIViewController, ScrollViewDismissable, StatusBarCo
         child.updateTopInsets(to: preferredOffset)
     }
     
-    @IBAction func unwind(_ segue: UIStoryboardSegue) { }
-    
-    override func canPerformUnwindSegueAction(_ action: Selector, from fromViewController: UIViewController, withSender sender: Any) -> Bool {
-        
-        return presentingViewController?.presentingViewController == nil && DrawerConstants.topViewController != self
-    }
-    
-    @available(iOS 13, *)
-    override func canPerformUnwindSegueAction(_ action: Selector, from fromViewController: UIViewController, sender: Any?) -> Bool {
-        
-        return presentingViewController?.presentingViewController == nil && DrawerConstants.topViewController != self
-    }
+//    @IBAction func unwind(_ segue: UIStoryboardSegue) { }
+//
+//    override func canPerformUnwindSegueAction(_ action: Selector, from fromViewController: UIViewController, withSender sender: Any) -> Bool {
+//
+//        return presentingViewController?.presentingViewController == nil && DrawerConstants.topViewController != self
+//    }
+//
+//    @available(iOS 13, *)
+//    override func canPerformUnwindSegueAction(_ action: Selector, from fromViewController: UIViewController, sender: Any?) -> Bool {
+//
+//        return presentingViewController?.presentingViewController == nil && DrawerConstants.topViewController != self
+//    }
 }
 
 extension SecondViewController {

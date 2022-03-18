@@ -127,6 +127,7 @@ class TableViewController: UIViewController {
         
         guard gr.state == .began else { return }
         
+        DrawerConstants.isUnwind = true
         performSegue(withIdentifier: "unwind", sender: nil)
     }
     
