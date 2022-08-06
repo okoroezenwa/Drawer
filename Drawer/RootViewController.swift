@@ -8,7 +8,7 @@
 
 import UIKit
 
-class ViewController: UIViewController, StatusBarControlling {
+class RootViewController: UIViewController, StatusBarControlling, ViewController {
     
     @IBOutlet var presentSwitch: UISwitch!
     @IBOutlet var refreshSwitch: UISwitch!
@@ -18,6 +18,12 @@ class ViewController: UIViewController, StatusBarControlling {
     @IBOutlet var rowLabel: UILabel!
     @IBOutlet var animateSwitch: UISwitch!
     @IBOutlet var fullscreenSwitch: UISwitch!
+    
+    var presenterSnapshot: UIView? {
+        didSet {
+            oldValue?.removeFromSuperview()
+        }
+    }
     
     var useLightStatusBar = false {
         
@@ -115,5 +121,12 @@ class ViewController: UIViewController, StatusBarControlling {
         }
         
         return true
+    }
+    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        
+        super.traitCollectionDidChange(previousTraitCollection)
+        
+        NotificationCenter.default.post(name: DrawerConstants.significantChangeOccurred, object: nil, userInfo: nil)
     }
 }

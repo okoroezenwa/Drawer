@@ -112,7 +112,7 @@ class PresentationInteractor: UIPercentDrivenInteractiveTransition {
                     
                 } else {
                     
-                    if #available(iOS 11, *) { } else if let vc = presenter as? ViewController {
+                    if #available(iOS 11, *) { } else if let vc = presenter as? ViewController & UIViewController {
                         
                         let value = DrawerConstants.cornerRadius - (progress * DrawerConstants.cornerRadius)
                         vc.view.layer.cornerRadius = value

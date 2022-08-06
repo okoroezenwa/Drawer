@@ -35,7 +35,7 @@ class PresentationAnimator: NSObject, UIViewControllerAnimatedTransitioning {
         
         if isPresentation {
             
-          transitionContext.containerView.addSubview(controller.view)
+            transitionContext.containerView.addSubview(controller.view)
         }
         
         let presentedFrame = transitionContext.finalFrame(for: controller)

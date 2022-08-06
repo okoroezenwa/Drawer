@@ -37,7 +37,7 @@ protocol ScrollViewDismissable: ViewControllerOperationAttaching {
     /// Whether the presented view controller uses the full screen dimensions or is presented as a card.
     var isPresentedFullScreen: Bool { get }
     
-    /// Whether snapshots of the presenting view controller should be placed behind the presented view controller. This is useful for blurred backgrounds.
+    /// Whether snapshots of the presenting view controller should be placed behind the presented view controller. Useful for blurred backgrounds.
     var shouldUseBackingSnapshots: Bool { get }
     
     /// Whether the scroll view does not contain the current touch. If `true`, the dismissal begins immediately.
@@ -150,14 +150,15 @@ extension ScrollViewDismissable {
 extension ViewControllerOperationAttaching {
     
     func presentationPreparation() {  }
-    
     func complementaryPresentationAnimation() {  }
-    
     func presentationCompletion(_ completed: Bool) {  }
-    
     func dismissalPreparation() {  }
-    
     func complementaryDismissalAnimation() {  }
-    
     func dismissalCompletion(_ completed: Bool) {  }
 }
+
+protocol SnapshotContaining: AnyObject {
+    var presenterSnapshot: UIView? { get set }
+}
+
+protocol ViewController: SnapshotContaining {  }

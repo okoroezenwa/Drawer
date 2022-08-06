@@ -82,10 +82,11 @@ struct DrawerConstants {
     
     static let cornerRadius = 18/*12*/ as CGFloat
     static var numberOfControllers = 0
-    static var root: ViewController? { appDelegate.window?.rootViewController as? ViewController }
+    static var root: (ViewController & UIViewController)? { appDelegate.window?.rootViewController as? ViewController & UIViewController }
     static var topViewController: UIViewController? { return topVC(startingFrom: appDelegate.window?.rootViewController) }
     static let appDelegate = UIApplication.shared.delegate as! AppDelegate
     static let themeChanged = Notification.Name.init("themeChanged")
+    static let significantChangeOccurred = Notification.Name.init("significantChangeOccurred")
     static var isUnwind = false
     
     static func topVC(startingFrom vc: UIViewController? = topViewController) -> UIViewController? {

@@ -20,11 +20,11 @@ func statusBarHeightValue(from view: UIView?) -> CGFloat {
     }
 }
 
-class PresentationController: UIPresentationController {
+class PresentationController: UIPresentationController, SnapshotContaining {
     
     private lazy var dimmingView: UIView = {
         
-            let view = UIView(frame: containerView?.bounds ?? UIScreen.main.bounds)
+        let view = UIView(frame: containerView?.bounds ?? UIScreen.main.bounds)
         view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = UIColor(white: 0.0, alpha: 0.5)
         view.alpha = 0.0
@@ -34,32 +34,45 @@ class PresentationController: UIPresentationController {
         
         return view
     }()
+    lazy var hiddenView: UIView = {
+        
+        let view = UIView.init(frame: .zero)
+        view.isHidden = true
+        
+        return view
+    }()
     
     lazy var shouldUseBackingSnapshots = (presentedViewController as? ScrollViewDismissable)?.shouldUseBackingSnapshots ?? false
-    var leftSnapshot: UIView? {
-        
+    
+    var presenterSnapshot: UIView? {
         didSet {
-            
+            oldValue?.removeFromSuperview()
+        }
+    }
+    var leftSnapshot: UIView? {
+        didSet {
             oldValue?.removeFromSuperview()
         }
     }
     var rightSnapshot: UIView? {
-        
         didSet {
-            
             oldValue?.removeFromSuperview()
         }
     }
     var lowerSnapshot: UIView? {
-        
         didSet {
-            
             oldValue?.removeFromSuperview()
         }
     }
     
-    lazy var presenter = previousDismissableViewController(from: presentingViewController) ?? DrawerConstants.root
-    lazy var grandPresenter = (previousDismissableViewController(from: presenter?.presentingViewController) ?? DrawerConstants.root).value(if: { $0 != presenter })
+    weak var presenterSuperview: UIView?
+    weak var snapshotContainer: SnapshotContaining?
+    weak var snapShotSuperview: UIView?
+    
+    lazy var presenter: UIViewController? = previousDismissableViewController(from: presentingViewController) ?? DrawerConstants.root
+    lazy var grandPresenter: UIViewController? = (previousDismissableViewController(from: presenter?.presentingViewController) ?? DrawerConstants.root).value(if: { $0 != presenter })
+    
+    lazy var grandPresenterSnapshot = (grandPresenter as? SnapshotContaining ?? grandPresenter?.presentationController as? SnapshotContaining)?.presenterSnapshot
     
     var newOrigin: CGFloat { statusBarHeight + 10 }
     var grandParentYTranslation = 10 as CGFloat
@@ -84,7 +97,21 @@ class PresentationController: UIPresentationController {
         
         super.init(presentedViewController: presentedViewController, presenting: presentingViewController)
         
+        NotificationCenter.default.addObserver(self, selector: #selector(significantChangeOccurred(_:)), name: DrawerConstants.significantChangeOccurred, object: nil)
+        
 //        self.delegate = presentedViewController as? PresentedContainerViewController
+    }
+    
+    @objc func significantChangeOccurred(_ notification: Notification) {
+        
+        if notification.userInfo == nil {
+            
+            createPresenterSnapshot(isPresentationStart: false)
+            
+        } else if let userInfo = notification.userInfo, let presenter = userInfo["presenter"] as? UIViewController, presenter == self.presenter {
+            
+            createPresenterSnapshot(isPresentationStart: false)
+        }
     }
     
     @objc func handleTap(recognizer: UITapGestureRecognizer) {
@@ -92,7 +119,7 @@ class PresentationController: UIPresentationController {
         presentingViewController.dismiss(animated: true)
     }
     
-    func createSnapshots(forStart: Bool) {
+    func createEdgeSnapshots(forStart: Bool) {
         
         let xRatio = (UIScreen.main.bounds.width - 32) / UIScreen.main.bounds.width
         let yRatio = (UIScreen.main.bounds.height - (newOrigin * 2)) / UIScreen.main.bounds.height
@@ -152,17 +179,61 @@ class PresentationController: UIPresentationController {
         rightSnapshot.transform = .init(translationX: 0, y: UIScreen.main.bounds.height)
     }
     
+    func createPresenterSnapshot(isPresentationStart: Bool) {
+        
+        guard let presenter = presenter, let containerView = containerView, let snapshot = presenter.view.snapshotView(afterScreenUpdates: true), let container = presenter as? SnapshotContaining ?? presenter.presentationController as? SnapshotContaining else { return }
+        
+        snapshotContainer = container
+        container.presenterSnapshot = snapshot
+        snapshot.clipsToBounds = true
+        snapshot.frame = presenter.view.frame
+        
+        var superview: UIView?
+
+        if container is UIViewController {
+            
+            containerView.insertSubview(snapshot, aboveSubview: dimmingView)
+            superview = containerView
+            
+        } else if let controller = presenter.presentationController as? PresentationController, let snapshot = controller.presenterSnapshot {
+            
+            controller.containerView?.insertSubview(snapshot, aboveSubview: controller.dimmingView)
+            superview = controller.containerView
+        }
+        
+        if isPresentationStart {
+            
+            snapShotSuperview = superview
+            presenterSuperview = presenter.view.superview
+            hiddenView.frame = containerView.bounds
+            hiddenView.addSubview(presenter.view)
+            containerView.addSubview(hiddenView)
+        
+        } else {
+            
+            snapshot.layer.cornerRadius = DrawerConstants.cornerRadius
+            
+            if use3DTransforms {
+                snapshot.layer.transform = self.transform3D(for: presenter, completed: true)
+            } else {
+                snapshot.transform = self.transform(for: presenter, completed: true)
+            }
+        }
+    }
+    
     override func presentationTransitionWillBegin() {
         
-        guard let presenter = presenter else { return }
-
-        containerView?.insertSubview(dimmingView, at: 0)
-        presentedView?.clipsToBounds = true
+        guard let presenter = presenter, let presentedView = presentedView, let containerView = containerView else { return }
+        
+        containerView.insertSubview(dimmingView, at: 0)
+        presentedView.clipsToBounds = true
+        
+        createPresenterSnapshot(isPresentationStart: true)
         
         if let vc = presentedViewController as? ScrollViewDismissable, !vc.isPresentedFullScreen {
             
-            presentedView?.layer.setContinuousCornersIfPossible(to: true)
-            presentedView?.layer.cornerRadius = DrawerConstants.cornerRadius
+            presentedView.layer.setContinuousCornersIfPossible(to: true)
+            presentedView.layer.cornerRadius = DrawerConstants.cornerRadius
         }
 
         if let vc = presentedViewController as? StatusBarControlling {
@@ -170,7 +241,7 @@ class PresentationController: UIPresentationController {
             vc.useLightStatusBar = (vc as? ScrollViewDismissable)?.isPresentedFullScreen == false
         }
         
-        createSnapshots(forStart: true)
+        createEdgeSnapshots(forStart: true)
         
         guard let coordinator = presentedViewController.transitionCoordinator else {
             
@@ -190,7 +261,7 @@ class PresentationController: UIPresentationController {
         
         if #available(iOS 11, *) { } else {
             
-            presenter.view.layer.animate(#keyPath(CALayer.cornerRadius), from: 0, to: DrawerConstants.cornerRadius, duration: coordinator.transitionDuration, timingFunctionName: .linear)
+            snapshotContainer?.presenterSnapshot?.layer.animate(#keyPath(CALayer.cornerRadius), from: 0, to: DrawerConstants.cornerRadius, duration: coordinator.transitionDuration, timingFunctionName: .linear)
         }
         
         if #available(iOS 11, *) { } else {
@@ -199,11 +270,11 @@ class PresentationController: UIPresentationController {
                 
                 if use3DTransforms {
                     
-                    presenter.view.layer.transform = self.transform3D(for: presenter, completed: true)
+                    self.snapshotContainer?.presenterSnapshot?.layer.transform = self.transform3D(for: presenter, completed: true)
                     
                 } else {
                 
-                    presenter.view.transform = self.transform(for: presenter, completed: true)
+                    self.snapshotContainer?.presenterSnapshot?.transform = self.transform(for: presenter, completed: true)
                 }
                 
             }, completion: nil)
@@ -212,11 +283,11 @@ class PresentationController: UIPresentationController {
                 
                 if use3DTransforms {
                     
-                    self.grandPresenter?.view.layer.transform = self.transform3D(for: self.grandPresenter, completed: true).concatenating(.translation(x: 0, y: self.grandParentYTranslation, z: 1.00001))
+                    self.grandPresenterSnapshot?.layer.transform = self.transform3D(for: self.grandPresenter, completed: true).concatenating(.translation(x: 0, y: self.grandParentYTranslation, z: 1.00001))
                     
                 } else {
                 
-                    self.grandPresenter?.view.transform = self.transform(for: self.grandPresenter, completed: true).translatedBy(x: 0, y: self.grandParentYTranslation)
+                    self.grandPresenterSnapshot?.transform = self.transform(for: self.grandPresenter, completed: true).translatedBy(x: 0, y: self.grandParentYTranslation)
                 }
                 
             }, completion: nil)
@@ -234,20 +305,14 @@ class PresentationController: UIPresentationController {
             
             (self.presentedViewController as? ViewControllerOperationAttaching)?.complementaryPresentationAnimation()
             
-//            UIView.animateKeyframes(withDuration: context.transitionDuration, delay: 0, options: .calculationModeCubic, animations: {
-//
-//                UIView.addKeyframe(withRelativeStartTime: 0, relativeDuration: 0.8, animations: { appDelegate.window?.transform = .init(translationX: 20, y: 0) })
-//
-//            }, completion: nil)
-            
             if #available(iOS 11, *) {
                 
-                presenter.view.layer.cornerRadius = DrawerConstants.cornerRadius
+                self.snapshotContainer?.presenterSnapshot?.layer.cornerRadius = DrawerConstants.cornerRadius
                 
                 if use3DTransforms {
                     
-                    presenter.view.layer.transform = self.transform3D(for: presenter, completed: true)
-                    self.grandPresenter?.view.layer.transform = self.transform3D(for: self.grandPresenter, completed: true).concatenating(.translation(x: 0, y: self.grandParentYTranslation, z: 1.00001))
+                    self.snapshotContainer?.presenterSnapshot?.layer.transform = self.transform3D(for: presenter, completed: true)
+                    self.grandPresenterSnapshot?.layer.transform = self.transform3D(for: self.grandPresenter, completed: true).concatenating(.translation(x: 0, y: self.grandParentYTranslation, z: 1.00001))
                     
                     (presenter.presentationController as? PresentationController)?.leftSnapshot?.layer.transform = CATransform3D.scale(x: 1, y: 0.5, z: 1.00001).concatenating(.translation(x: 100, y: 1, z: 1.00001))//self.transform3D(for: presenter, completed: true)
                     (self.grandPresenter?.presentationController as? PresentationController)?.leftSnapshot?.layer.transform = CATransform3D.scale(x: 1, y: 0.5, z: 1.00001).concatenating(.translation(x: 100, y: 1, z: 1.00001))
@@ -257,8 +322,8 @@ class PresentationController: UIPresentationController {
                 
                 } else {
                     
-                    presenter.view.transform = self.transform(for: presenter, completed: true)
-                    self.grandPresenter?.view.transform = self.transform(for: self.grandPresenter, completed: true).translatedBy(x: 0, y: self.grandParentYTranslation)
+                    self.snapshotContainer?.presenterSnapshot?.transform = self.transform(for: presenter, completed: true)
+                    self.grandPresenterSnapshot?.transform = self.transform(for: self.grandPresenter, completed: true).translatedBy(x: 0, y: self.grandParentYTranslation)
                     
                     (presenter.presentationController as? PresentationController)?.leftSnapshot?.transform = self.transform(for: presenter, completed: true)
                     (self.grandPresenter?.presentationController as? PresentationController)?.leftSnapshot?.transform = self.transform(for: self.grandPresenter, completed: true).translatedBy(x: 0, y: self.grandParentYTranslation)
@@ -276,21 +341,23 @@ class PresentationController: UIPresentationController {
             DrawerConstants.numberOfControllers += 1
         }
         
+        createPresenterSnapshot(isPresentationStart: false)
+        
         if use3DTransforms {
         
-            presenter.view.layer.transform = transform3D(for: presenter, completed: true)
-            grandPresenter?.view.layer.transform = transform3D(for: grandPresenter, completed: true).concatenating(.translation(x: 0, y: completed ? grandParentYTranslation : 0, z: 0))
+            snapshotContainer?.presenterSnapshot?.layer.transform = transform3D(for: presenter, completed: true)
+            grandPresenterSnapshot?.layer.transform = transform3D(for: grandPresenter, completed: true).concatenating(.translation(x: 0, y: completed ? grandParentYTranslation : 0, z: 0))
             
             (presenter.presentationController as? PresentationController)?.leftSnapshot?.layer.transform = CATransform3D.scale(x: 1, y: 0.5, z: 1.00001).concatenating(.translation(x: 100, y: 1, z: 0))
             (grandPresenter?.presentationController as? PresentationController)?.leftSnapshot?.layer.transform = CATransform3D.scale(x: 1, y: 0.5, z: 1.00001).concatenating(.translation(x: 100, y: 1, z: 0))
             
             (presenter.presentationController as? PresentationController)?.rightSnapshot?.layer.transform = CATransform3D.scale(x: 1, y: 0.5, z: 1.00001).concatenating(.translation(x: -100, y: 1, z: 1.00001))
-            (self.grandPresenter?.presentationController as? PresentationController)?.rightSnapshot?.layer.transform = CATransform3D.scale(x: 1, y: 0.5, z: 1.00001).concatenating(.translation(x: -100, y: 1, z: 0))
+            (grandPresenter?.presentationController as? PresentationController)?.rightSnapshot?.layer.transform = CATransform3D.scale(x: 1, y: 0.5, z: 1.00001).concatenating(.translation(x: -100, y: 1, z: 0))
             
         } else {
             
-            presenter.view.transform = transform(for: presenter, completed: completed)
-            grandPresenter?.view.transform = transform(for: grandPresenter, completed: true).translatedBy(x: 0, y: completed ? grandParentYTranslation : 0)
+            snapshotContainer?.presenterSnapshot?.transform = transform(for: presenter, completed: completed)
+            grandPresenterSnapshot?.transform = transform(for: grandPresenter, completed: true).translatedBy(x: 0, y: completed ? grandParentYTranslation : 0)
             
             (presenter.presentationController as? PresentationController)?.leftSnapshot?.transform = transform(for: presenter, completed: completed)
             (grandPresenter?.presentationController as? PresentationController)?.leftSnapshot?.transform = transform(for: grandPresenter, completed: true).translatedBy(x: 0, y: completed ? grandParentYTranslation : 0)
@@ -298,15 +365,9 @@ class PresentationController: UIPresentationController {
         
         if presenter is ViewController {
         
-            presenter.view.layer.cornerRadius = radius(for: .presentation, completed: completed)
+            snapshotContainer?.presenterSnapshot?.layer.cornerRadius = radius(for: .presentation, completed: completed)
             
             if #available(iOS 11, *) { } else { presenter.view.layer.removeAllAnimations() }
-            
-            if completed {
-                
-                presenter.view.bounds.size.height += 1
-                presenter.view.bounds.size.height -= 1
-            }
         }
         
         (presentedViewController as? ViewControllerOperationAttaching)?.presentationCompletion(completed)
@@ -332,7 +393,7 @@ class PresentationController: UIPresentationController {
             
             if presenter is ViewController || (presenter as? ScrollViewDismissable)?.isPresentedFullScreen == true {
                   
-                presenter?.view.layer.cornerRadius = 0
+                snapshotContainer?.presenterSnapshot?.layer.cornerRadius = 0
             }
             
             if let vc = presentingViewController as? StatusBarControlling, let previous = presenter as? StatusBarControlling {
@@ -342,8 +403,8 @@ class PresentationController: UIPresentationController {
             
             if use3DTransforms {
             
-                self.presenter?.view.layer.transform = .identity
-                self.grandPresenter?.view.layer.transform = self.transform3D(for: self.grandPresenter, completed: true)
+                self.snapshotContainer?.presenterSnapshot?.layer.transform = .identity
+                self.grandPresenterSnapshot?.layer.transform = self.transform3D(for: self.grandPresenter, completed: true)
                 
                 (self.presenter?.presentationController as? PresentationController)?.leftSnapshot?.layer.transform = .identity
                 (self.grandPresenter?.presentationController as? PresentationController)?.leftSnapshot?.layer.transform = CATransform3D.scale(x: 1, y: 0.5, z: 1.00001).concatenating(.translation(x: 100, y: 1, z: 0))
@@ -353,8 +414,8 @@ class PresentationController: UIPresentationController {
             
             } else {
                 
-                self.presenter?.view.transform = .identity
-                self.grandPresenter?.view.transform = self.transform(for: self.grandPresenter, completed: true)
+                self.snapshotContainer?.presenterSnapshot?.transform = .identity
+                self.grandPresenterSnapshot?.transform = self.transform(for: self.grandPresenter, completed: true)
                 
                 (self.presenter?.presentationController as? PresentationController)?.leftSnapshot?.transform = .identity
                 (self.grandPresenter?.presentationController as? PresentationController)?.leftSnapshot?.transform = self.transform(for: self.grandPresenter, completed: true)
@@ -379,200 +440,41 @@ class PresentationController: UIPresentationController {
 
                 if presenter is ViewController || (presenter as? ScrollViewDismissable)?.isPresentedFullScreen == true {
                       
-                    presenter?.view.layer.animate(#keyPath(CALayer.cornerRadius), from: DrawerConstants.cornerRadius, to: 0, duration: coordinator.transitionDuration, timingFunctionName: .linear)
+                    self.snapshotContainer?.presenterSnapshot?.layer.animate(#keyPath(CALayer.cornerRadius), from: DrawerConstants.cornerRadius, to: 0, duration: coordinator.transitionDuration, timingFunctionName: .linear)
                 }
             }
         }
         
         if #available(iOS 11, *) { } else {
             
-            coordinator.animateAlongsideTransition(in: presenter?.view, animation: { _ in
-                
-                if use3DTransforms {
-                
-                    self.presenter?.view.layer.transform = .identity
-                
-                } else {
-                    
-                    self.presenter?.view.transform = .identity
-                }
-                
-            }, completion: nil)
-            
-            coordinator.animateAlongsideTransition(in: grandPresenter?.view, animation: { _ in
-                
-                if use3DTransforms {
-                
-                    self.grandPresenter?.view.layer.transform = self.transform3D(for: self.grandPresenter, completed: true)
-                
-                } else {
-                    
-                    self.grandPresenter?.view.transform = self.transform(for: self.grandPresenter, completed: true)
-                }
-                
-            }, completion: nil)
-            
-            coordinator.animateAlongsideTransition(in: (self.presenter?.presentationController as? PresentationController)?.leftSnapshot, animation: { _ in
-                
-                if use3DTransforms {
-                
-                    (self.presenter?.presentationController as? PresentationController)?.leftSnapshot?.layer.transform = .identity
-                
-                } else {
-                    
-//                    self.grandPresenter?.view.transform = self.transform(for: self.grandPresenter, completed: true)
-                }
-                
-            }, completion: nil)
-            
-            coordinator.animateAlongsideTransition(in: (self.grandPresenter?.presentationController as? PresentationController)?.leftSnapshot, animation: { _ in
-                
-                if use3DTransforms {
-                
-                    (self.grandPresenter?.presentationController as? PresentationController)?.leftSnapshot?.layer.transform = CATransform3D.scale(x: 1, y: 0.5, z: 1.00001).concatenating(.translation(x: 100, y: 1, z: 0))
-                
-                } else {
-                    
-//                    self.grandPresenter?.view.transform = self.transform(for: self.grandPresenter, completed: true)
-                }
-                
-            }, completion: nil)
-            
-            coordinator.animateAlongsideTransition(in: (self.presenter?.presentationController as? PresentationController)?.rightSnapshot, animation: { _ in
-                
-                if use3DTransforms {
-                
-                    (self.presenter?.presentationController as? PresentationController)?.rightSnapshot?.layer.transform = .identity
-                
-                } else {
-                    
-//                    self.grandPresenter?.view.transform = self.transform(for: self.grandPresenter, completed: true)
-                }
-                
-            }, completion: nil)
-            
-            coordinator.animateAlongsideTransition(in: (self.grandPresenter?.presentationController as? PresentationController)?.rightSnapshot, animation: { _ in
-                
-                if use3DTransforms {
-                
-                    (self.grandPresenter?.presentationController as? PresentationController)?.rightSnapshot?.layer.transform = CATransform3D.scale(x: 1, y: 0.5, z: 1.00001).concatenating(.translation(x: -100, y: 1, z: 0))
-                
-                } else {
-                    
-//                    self.grandPresenter?.view.transform = self.transform(for: self.grandPresenter, completed: true)
-                }
-                
-            }, completion: nil)
+            performPreiOS11CoordinatorAnimations(with: coordinator)
         }
-        
-        var array: [UIViewController?] = {
-            
-            if #available(iOS 15, *), DrawerConstants.isUnwind {
-                
-                return [DrawerConstants.topViewController as? DismissableViewController ?? previousDismissableViewController(from: DrawerConstants.topViewController)]
-            }
-            
-            return []
-        }()
-        
-        if #available(iOS 15, *), DrawerConstants.isUnwind {
-            
-            repeat {
-                
-                array.append(previousDismissableViewController(from: array.last?.flatMap({ $0 })?.presentingViewController))
-                
-            } while previousDismissableViewController(from: array.last?.flatMap({ $0 })?.presentingViewController) != nil
-        }
-        
-        array.forEach({ ($0?.presentationController as? PresentationController)?.hideSnapshots() })
         
         coordinator.animate(alongsideTransition: { _ in
-//
-//            let controller: PresentationController? = {
-//
-//                if #available(iOS 15, *), DrawerConstants.isUnwind, let vc = DrawerConstants.appDelegate.window?.rootViewController?.presentedViewController, let controller = vc.presentationController as? PresentationController {
-//
-//                    return controller
-//                }
-//
-//                return nil
-//            }()
             
             self.performInitialCoordinatorAnimations()
-            
-            array.forEach({
-                
-                if let controller = $0?.presentationController as? PresentationController {
-                    
-                    controller.performInitialCoordinatorAnimations()
-                }
-            })
             
             if #available(iOS 11, *) {
                 
                 if self.presenter is ViewController || (self.presenter as? ScrollViewDismissable)?.isPresentedFullScreen == true {
                     
-                    self.presenter?.view.layer.cornerRadius = 0
+                    self.snapshotContainer?.presenterSnapshot?.layer.cornerRadius = 0
                 }
                 
                 if use3DTransforms {
                     
                     self.perform3DTransforms()
-                    
-                    array.forEach({
-                        
-                        if let controller = $0?.presentationController as? PresentationController {
-                            
-                            controller.perform3DTransforms()
-                        }
-                    })
                 
                 } else {
                     
-                    self.presenter?.view.transform = .identity
-                    self.grandPresenter?.view.transform = self.transform(for: self.grandPresenter, completed: true)
+                    self.snapshotContainer?.presenterSnapshot?.transform = .identity
+                    self.grandPresenterSnapshot?.transform = self.transform(for: self.grandPresenter, completed: true)
                     
                     (self.presenter?.presentationController as? PresentationController)?.leftSnapshot?.transform = .identity
                     (self.grandPresenter?.presentationController as? PresentationController)?.leftSnapshot?.transform = self.transform(for: self.grandPresenter, completed: true)
                 }
             }
         })
-    }
-    
-    func hideSnapshots() {
-        
-        self.leftSnapshot?.isHidden = true
-        self.rightSnapshot?.isHidden = true
-        self.lowerSnapshot?.isHidden = true
-    }
-    
-    func performInitialCoordinatorAnimations() {
-        
-        if self.presenter is ViewController {
-            
-            self.presenter?.view.layoutIfNeeded()
-        }
-        
-        self.dimmingView.alpha = 0.0
-        self.dimmingView.frame.size.height = self.containerView?.bounds.height ?? UIScreen.main.bounds.height
-        
-        self.leftSnapshot?.transform = .init(translationX: 0, y: UIScreen.main.bounds.height)
-        self.rightSnapshot?.transform = .init(translationX: 0, y: UIScreen.main.bounds.height)
-        self.lowerSnapshot?.transform = .init(translationX: 0, y: self.lowerSnapshot?.frame.size.height ?? 0)
-        
-        (self.presentedViewController as? ScrollViewDismissable)?.complementaryDismissalAnimation()
-    }
-    
-    func perform3DTransforms() {
-        
-        self.presenter?.view.layer.transform = .identity
-        self.grandPresenter?.view.layer.transform = self.transform3D(for: self.grandPresenter, completed: true)
-        
-        (self.presenter?.presentationController as? PresentationController)?.leftSnapshot?.layer.transform = .identity
-        (self.grandPresenter?.presentationController as? PresentationController)?.leftSnapshot?.layer.transform = CATransform3D.scale(x: 1, y: 0.5, z: 1.00001).concatenating(.translation(x: 100, y: 1, z: 0))
-        
-        (self.presenter?.presentationController as? PresentationController)?.rightSnapshot?.layer.transform = .identity
-        (self.grandPresenter?.presentationController as? PresentationController)?.rightSnapshot?.layer.transform = CATransform3D.scale(x: 1, y: 0.5, z: 1.00001).concatenating(.translation(x: -100, y: 1, z: 0))
     }
     
     override func dismissalTransitionDidEnd(_ completed: Bool) {
@@ -616,8 +518,8 @@ class PresentationController: UIPresentationController {
         
             if use3DTransforms {
                 
-                presenter.view.layer.transform = completed ? .identity : transform3D(for: presenter, completed: true)
-                grandPresenter?.view.layer.transform = transform3D(for: grandPresenter, completed: true).concatenating(.translation(x: 0, y: completed ? 0 : grandParentYTranslation, z: 1.00001))
+                snapshotContainer?.presenterSnapshot?.layer.transform = completed ? .identity : transform3D(for: presenter, completed: true)
+                self.grandPresenterSnapshot?.layer.transform = transform3D(for: grandPresenter, completed: true).concatenating(.translation(x: 0, y: completed ? 0 : grandParentYTranslation, z: 1.00001))
                 
                 (presenter.presentationController as? PresentationController)?.leftSnapshot?.layer.transform = completed ? .identity : CATransform3D.scale(x: 1, y: 0.5, z: 1.00001).concatenating(.translation(x: 100, y: 1, z: 0))
                 (grandPresenter?.presentationController as? PresentationController)?.leftSnapshot?.layer.transform = CATransform3D.scale(x: 1, y: 0.5, z: 1.00001).concatenating(.translation(x: 100, y: 1, z: 0))
@@ -627,8 +529,8 @@ class PresentationController: UIPresentationController {
                 
             } else {
                 
-                presenter.view.transform = completed ? .identity : transform(for: presenter, completed: true)
-                grandPresenter?.view.transform = transform(for: grandPresenter, completed: true).translatedBy(x: 0, y: completed ? 0 : grandParentYTranslation)
+                snapshotContainer?.presenterSnapshot?.transform = completed ? .identity : transform(for: presenter, completed: true)
+                self.grandPresenterSnapshot?.transform = transform(for: grandPresenter, completed: true).translatedBy(x: 0, y: completed ? 0 : grandParentYTranslation)
                 
                 (presenter.presentationController as? PresentationController)?.leftSnapshot?.transform = completed ? .identity : transform(for: presenter, completed: true)
                 (grandPresenter?.presentationController as? PresentationController)?.leftSnapshot?.transform = transform(for: grandPresenter, completed: true).translatedBy(x: 0, y: completed ? 0 : grandParentYTranslation)
@@ -637,7 +539,7 @@ class PresentationController: UIPresentationController {
         
         if presenter is ViewController || (presenter as? ScrollViewDismissable)?.isPresentedFullScreen == true {
         
-            presenter.view.layer.cornerRadius = completed ? 0 : DrawerConstants.cornerRadius
+            snapshotContainer?.presenterSnapshot?.layer.cornerRadius = completed ? 0 : DrawerConstants.cornerRadius
             
             if #available(iOS 11, *) { } else { presenter.view.layer.removeAllAnimations() }
         }
@@ -647,23 +549,29 @@ class PresentationController: UIPresentationController {
             vc.useLightStatusBar = (vc as? ScrollViewDismissable)?.isPresentedFullScreen == false
         }
         
-        var viewIndex: Int?
-        var parent: UIView?
-
-        if presenter is ViewController, completed, let superview = presenter.view.superview, let index = superview.subviews.firstIndex(of: presenter.view) {
-
-            presenter.view.removeFromSuperview()
-            viewIndex = index
-            parent = superview
+//        var viewIndex: Int?
+//        var parent: UIView?
+//
+//        if presenter is ViewController, completed, let superview = presenter.view.superview, let index = superview.subviews.firstIndex(of: presenter.view) {
+//
+//            presenter.view.removeFromSuperview()
+//            viewIndex = index
+//            parent = superview
+//        }
+        
+        if completed {
+            
+            presenterSuperview?.addSubview(presenter.view)
+            snapshotContainer?.presenterSnapshot?.removeFromSuperview()
         }
 
         (presentedViewController as? ViewControllerOperationAttaching)?.dismissalCompletion(completed)
         (presenter as? ViewControllerOperationAttaching)?.dismissalCompletion(completed)
 
-        if presenter is ViewController, completed, let superview = parent, let index = viewIndex {
-
-            superview.insertSubview(presenter.view, at: index)
-        }
+//        if presenter is ViewController, completed, let superview = parent, let index = viewIndex {
+//
+//            superview.insertSubview(presenter.view, at: index)
+//        }
     }
     
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
@@ -737,7 +645,7 @@ class PresentationController: UIPresentationController {
             return statusBarHeight + 20
         }
         
-        return .init(width: parentSize.width, height: parentSize.height - difference + 20 + DrawerConstants.cornerRadius) // `20 + DrawerConstants.cornerRadius` takes care of swiping up instead of down during dismissal
+        return .init(width: parentSize.width, height: parentSize.height - difference + 20 + DrawerConstants.cornerRadius) // `20 + DrawerConstants.cornerRadius` takes care of swiping up instead of down during dismissal.
     }
     
     override func preferredContentSizeDidChange(forChildContentContainer container: UIContentContainer) {
@@ -826,6 +734,118 @@ extension PresentationController {
             
             case .dismissal: return completed ? 0 : DrawerConstants.cornerRadius
         }
+    }
+    
+    func hideSnapshots() {
+        
+        self.leftSnapshot?.isHidden = true
+        self.rightSnapshot?.isHidden = true
+        self.lowerSnapshot?.isHidden = true
+    }
+    
+    func performInitialCoordinatorAnimations() {
+        
+        self.dimmingView.alpha = 0.0
+        self.dimmingView.frame.size.height = self.containerView?.bounds.height ?? UIScreen.main.bounds.height
+        
+        self.leftSnapshot?.transform = .init(translationX: 0, y: UIScreen.main.bounds.height)
+        self.rightSnapshot?.transform = .init(translationX: 0, y: UIScreen.main.bounds.height)
+        self.lowerSnapshot?.transform = .init(translationX: 0, y: self.lowerSnapshot?.frame.size.height ?? 0)
+        
+        (self.presentedViewController as? ScrollViewDismissable)?.complementaryDismissalAnimation()
+    }
+    
+    func perform3DTransforms() {
+        
+        snapshotContainer?.presenterSnapshot?.layer.transform = .identity
+        self.grandPresenterSnapshot?.layer.transform = self.transform3D(for: self.grandPresenter, completed: true)
+        
+        (self.presenter?.presentationController as? PresentationController)?.leftSnapshot?.layer.transform = .identity
+        (self.grandPresenter?.presentationController as? PresentationController)?.leftSnapshot?.layer.transform = CATransform3D.scale(x: 1, y: 0.5, z: 1.00001).concatenating(.translation(x: 100, y: 1, z: 0))
+        
+        (self.presenter?.presentationController as? PresentationController)?.rightSnapshot?.layer.transform = .identity
+        (self.grandPresenter?.presentationController as? PresentationController)?.rightSnapshot?.layer.transform = CATransform3D.scale(x: 1, y: 0.5, z: 1.00001).concatenating(.translation(x: -100, y: 1, z: 0))
+    }
+    
+    func performPreiOS11CoordinatorAnimations(with coordinator: UIViewControllerTransitionCoordinator) {
+        
+        coordinator.animateAlongsideTransition(in: self.snapshotContainer?.presenterSnapshot, animation: { _ in
+            
+            if use3DTransforms {
+                
+                self.snapshotContainer?.presenterSnapshot?.layer.transform = .identity
+                
+            } else {
+                
+                self.snapshotContainer?.presenterSnapshot?.transform = .identity
+            }
+            
+        }, completion: nil)
+        
+        coordinator.animateAlongsideTransition(in: grandPresenterSnapshot, animation: { _ in
+            
+            if use3DTransforms {
+                
+                self.grandPresenterSnapshot?.layer.transform = self.transform3D(for: self.grandPresenter, completed: true)
+                
+            } else {
+                
+                self.grandPresenterSnapshot?.transform = self.transform(for: self.grandPresenter, completed: true)
+            }
+            
+        }, completion: nil)
+        
+        coordinator.animateAlongsideTransition(in: (self.presenter?.presentationController as? PresentationController)?.leftSnapshot, animation: { _ in
+            
+            if use3DTransforms {
+                
+                (self.presenter?.presentationController as? PresentationController)?.leftSnapshot?.layer.transform = .identity
+                
+            } else {
+                
+                // Unused
+            }
+            
+        }, completion: nil)
+        
+        coordinator.animateAlongsideTransition(in: (self.grandPresenter?.presentationController as? PresentationController)?.leftSnapshot, animation: { _ in
+            
+            if use3DTransforms {
+                
+                (self.grandPresenter?.presentationController as? PresentationController)?.leftSnapshot?.layer.transform = CATransform3D.scale(x: 1, y: 0.5, z: 1.00001).concatenating(.translation(x: 100, y: 1, z: 0))
+                
+            } else {
+                
+                // Unused
+            }
+            
+        }, completion: nil)
+        
+        coordinator.animateAlongsideTransition(in: (self.presenter?.presentationController as? PresentationController)?.rightSnapshot, animation: { _ in
+            
+            if use3DTransforms {
+                
+                (self.presenter?.presentationController as? PresentationController)?.rightSnapshot?.layer.transform = .identity
+                
+            } else {
+                
+                // Unused
+            }
+            
+        }, completion: nil)
+        
+        coordinator.animateAlongsideTransition(in: (self.grandPresenter?.presentationController as? PresentationController)?.rightSnapshot, animation: { _ in
+            
+            if use3DTransforms {
+                
+                (self.grandPresenter?.presentationController as? PresentationController)?.rightSnapshot?.layer.transform = CATransform3D.scale(x: 1, y: 0.5, z: 1.00001).concatenating(.translation(x: -100, y: 1, z: 0))
+                
+            } else {
+                
+                // Unused
+            }
+            
+        }, completion: nil)
     }
 }
 

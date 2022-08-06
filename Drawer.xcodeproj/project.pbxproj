@@ -13,7 +13,7 @@
 		BE3B737425D92F63007A89F5 /* DismissalProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE3B737325D92F63007A89F5 /* DismissalProtocols.swift */; };
 		BE96E2B3241E26AD0096CEE9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE96E2B2241E26AD0096CEE9 /* AppDelegate.swift */; };
 		BE96E2B5241E26AD0096CEE9 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE96E2B4241E26AD0096CEE9 /* SceneDelegate.swift */; };
-		BE96E2B7241E26AD0096CEE9 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE96E2B6241E26AD0096CEE9 /* ViewController.swift */; };
+		BE96E2B7241E26AD0096CEE9 /* RootViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE96E2B6241E26AD0096CEE9 /* RootViewController.swift */; };
 		BE96E2BA241E26AD0096CEE9 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BE96E2B8241E26AD0096CEE9 /* Main.storyboard */; };
 		BE96E2BC241E26AF0096CEE9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BE96E2BB241E26AF0096CEE9 /* Assets.xcassets */; };
 		BE96E2BF241E26AF0096CEE9 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BE96E2BD241E26AF0096CEE9 /* LaunchScreen.storyboard */; };
@@ -33,7 +33,7 @@
 		BE96E2AF241E26AD0096CEE9 /* Drawer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Drawer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BE96E2B2241E26AD0096CEE9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		BE96E2B4241E26AD0096CEE9 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
-		BE96E2B6241E26AD0096CEE9 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		BE96E2B6241E26AD0096CEE9 /* RootViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootViewController.swift; sourceTree = "<group>"; };
 		BE96E2B9241E26AD0096CEE9 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		BE96E2BB241E26AF0096CEE9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		BE96E2BE241E26AF0096CEE9 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -86,7 +86,7 @@
 				BE13C7DD24FCF4CA00547AD6 /* NavigationInteractor.swift */,
 				BEF55AEF24B7885F005AE484 /* PresentationManager.swift */,
 				BE96E2B8241E26AD0096CEE9 /* Main.storyboard */,
-				BE96E2B6241E26AD0096CEE9 /* ViewController.swift */,
+				BE96E2B6241E26AD0096CEE9 /* RootViewController.swift */,
 				BE2E82FF25CBD3D100131C8C /* ConstantValues.swift */,
 				BEF55AEB24B75A33005AE484 /* SecondViewController.swift */,
 				BEF55AF524BA2892005AE484 /* TableViewController.swift */,
@@ -172,7 +172,7 @@
 				BEF55AF024B7885F005AE484 /* PresentationManager.swift in Sources */,
 				BE13C7DC24FCF14600547AD6 /* NavigationAnimator.swift in Sources */,
 				BEF55AF424B87F3E005AE484 /* PresentationInteractor.swift in Sources */,
-				BE96E2B7241E26AD0096CEE9 /* ViewController.swift in Sources */,
+				BE96E2B7241E26AD0096CEE9 /* RootViewController.swift in Sources */,
 				BE96E2B3241E26AD0096CEE9 /* AppDelegate.swift in Sources */,
 				BE13C7DE24FCF4CA00547AD6 /* NavigationInteractor.swift in Sources */,
 				BE96E2B5241E26AD0096CEE9 /* SceneDelegate.swift in Sources */,
@@ -328,6 +328,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = P75398C8MB;
 				INFOPLIST_FILE = Drawer/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
@@ -335,6 +336,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.okoroezenwa.Drawer;
 				PRODUCT_NAME = Drawer;
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -349,6 +351,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = P75398C8MB;
 				INFOPLIST_FILE = Drawer/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
@@ -356,6 +359,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.okoroezenwa.Drawer;
 				PRODUCT_NAME = Drawer;
 				PROVISIONING_PROFILE_SPECIFIER = "";

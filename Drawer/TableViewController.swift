@@ -70,7 +70,7 @@ class TableViewController: UIViewController {
         }
         
         tableView.tableFooterView = UIView.init(frame: .init(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 0.00001))
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+//        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
         
         updateLabel()
     }
@@ -176,6 +176,7 @@ extension TableViewController: UITableViewDelegate, UITableViewDataSource {
         
         cell.backgroundColor = .clear
         cell.textLabel?.text = indexPath.row % 2 == 0 ? "Presented" : "Pushed"
+        cell.detailTextLabel?.text = indexPath.row % 2 == 0 ? "Presents a new view controller with the system-default presentation controller" : "Pushes a new view controller onto the screen"
         
         return cell
     }
