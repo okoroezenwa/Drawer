@@ -107,10 +107,12 @@ class PresentationController: UIPresentationController, SnapshotContaining {
         if notification.userInfo == nil {
             
             createPresenterSnapshot(isPresentationStart: false)
+            createEdgeSnapshots(forStart: false)
             
         } else if let userInfo = notification.userInfo, let presenter = userInfo["presenter"] as? UIViewController, presenter == self.presenter {
             
             createPresenterSnapshot(isPresentationStart: false)
+            createEdgeSnapshots(forStart: false)
         }
     }
     
