@@ -228,8 +228,6 @@ class PresentationController: UIPresentationController, SnapshotContaining {
         containerView.insertSubview(dimmingView, at: 0)
         presentedView.clipsToBounds = true
         
-        createPresenterSnapshot(isPresentationStart: true)
-        
         if let vc = presentedViewController as? ScrollViewDismissable, !vc.isPresentedFullScreen {
             
             presentedView.layer.setContinuousCornersIfPossible(to: true)
@@ -241,6 +239,7 @@ class PresentationController: UIPresentationController, SnapshotContaining {
             vc.useLightStatusBar = (vc as? ScrollViewDismissable)?.isPresentedFullScreen == false
         }
         
+        createPresenterSnapshot(isPresentationStart: true)
         createEdgeSnapshots(forStart: true)
         
         guard let coordinator = presentedViewController.transitionCoordinator else {
@@ -341,7 +340,7 @@ class PresentationController: UIPresentationController, SnapshotContaining {
             DrawerConstants.numberOfControllers += 1
         }
         
-        createPresenterSnapshot(isPresentationStart: false)
+//        createPresenterSnapshot(isPresentationStart: false)
         
         if use3DTransforms {
         
