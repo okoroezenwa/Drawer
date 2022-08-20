@@ -49,21 +49,6 @@ class PresentationController: UIPresentationController, SnapshotContaining {
             oldValue?.removeFromSuperview()
         }
     }
-    var leftSnapshot: UIView? {
-        didSet {
-            oldValue?.removeFromSuperview()
-        }
-    }
-    var rightSnapshot: UIView? {
-        didSet {
-            oldValue?.removeFromSuperview()
-        }
-    }
-    var lowerSnapshot: UIView? {
-        didSet {
-            oldValue?.removeFromSuperview()
-        }
-    }
     
     weak var presenterSuperview: UIView?
     weak var snapshotContainer: SnapshotContaining?
@@ -107,78 +92,16 @@ class PresentationController: UIPresentationController, SnapshotContaining {
         if notification.userInfo == nil {
             
             createPresenterSnapshot(isPresentationStart: false)
-            createEdgeSnapshots(forStart: false)
             
         } else if let userInfo = notification.userInfo, let presenter = userInfo["presenter"] as? UIViewController, presenter == self.presenter {
             
             createPresenterSnapshot(isPresentationStart: false)
-            createEdgeSnapshots(forStart: false)
         }
     }
     
     @objc func handleTap(recognizer: UITapGestureRecognizer) {
         
         presentingViewController.dismiss(animated: true)
-    }
-    
-    func createEdgeSnapshots(forStart: Bool) {
-        
-        let xRatio = (UIScreen.main.bounds.width - 32) / UIScreen.main.bounds.width
-        let yRatio = (UIScreen.main.bounds.height - (newOrigin * 2)) / UIScreen.main.bounds.height
-        let frame = frameOfPresentedViewInContainerView
-        let difference = ((1 - yRatio) * UIScreen.main.bounds.height) / 2
-        let sideWidth = ((1 - xRatio) * UIScreen.main.bounds.width) / 2
-        
-        guard shouldUseBackingSnapshots,
-              let leftSnapshot = presenter?.view.resizableSnapshotView(from: .init(x: 0, y: presenter is ViewController ? statusBarHeight + 10 + 10 : 0, width: sideWidth, height: presenter is ViewController ? UIScreen.main.bounds.height : frame.size.height), afterScreenUpdates: false, withCapInsets: .zero),
-              let rightSnapshot = presenter?.view.resizableSnapshotView(from: .init(x: UIScreen.main.bounds.width - sideWidth, y: presenter is ViewController ? statusBarHeight + 10 + 10 : 0, width: sideWidth, height: presenter is ViewController ? UIScreen.main.bounds.height : frame.size.height), afterScreenUpdates: false, withCapInsets: .zero),
-              let lowerSnapshot = presenter?.view.resizableSnapshotView(from: .init(x: 0, y: frame.height - difference - (presenter is ViewController ? 0 : (20 + DrawerConstants.cornerRadius)), width: UIScreen.main.bounds.width, height: difference), afterScreenUpdates: false, withCapInsets: .zero),
-              let view = containerView else { return }
-        
-        [leftSnapshot, rightSnapshot, lowerSnapshot].forEach({ $0.translatesAutoresizingMaskIntoConstraints = false })
-        
-        self.leftSnapshot = leftSnapshot
-        self.rightSnapshot = rightSnapshot
-        self.lowerSnapshot = lowerSnapshot
-        
-        if forStart {
-        
-            view.addSubview(leftSnapshot)
-            view.addSubview(rightSnapshot)
-            view.addSubview(lowerSnapshot)
-            
-        } else {
-            
-            view.insertSubview(leftSnapshot, at: view.subviews.endIndex - 1)
-            view.insertSubview(rightSnapshot, at: view.subviews.endIndex - 1)
-            view.insertSubview(lowerSnapshot, at: view.subviews.endIndex - 1)
-        }
-
-        NSLayoutConstraint.activate([
-            
-            leftSnapshot.topAnchor.constraint(equalTo: view.topAnchor, constant: statusBarHeight + 10 + 10),
-            leftSnapshot.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            leftSnapshot.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 20 + DrawerConstants.cornerRadius),
-            leftSnapshot.widthAnchor.constraint(equalToConstant: sideWidth),
-            rightSnapshot.topAnchor.constraint(equalTo: view.topAnchor, constant: statusBarHeight + 10 + 10),
-            rightSnapshot.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            rightSnapshot.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 20 + DrawerConstants.cornerRadius),
-            rightSnapshot.widthAnchor.constraint(equalToConstant: sideWidth),
-            lowerSnapshot.heightAnchor.constraint(equalToConstant: difference),
-            lowerSnapshot.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            lowerSnapshot.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            lowerSnapshot.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        ])
-        
-        lowerSnapshot.transform = .init(translationX: 0, y: difference)
-        
-        leftSnapshot.clipsToBounds = true
-        leftSnapshot.layer.cornerRadius = DrawerConstants.cornerRadius
-        leftSnapshot.transform = .init(translationX: 0, y: UIScreen.main.bounds.height)
-        
-        rightSnapshot.clipsToBounds = true
-        rightSnapshot.layer.cornerRadius = DrawerConstants.cornerRadius
-        rightSnapshot.transform = .init(translationX: 0, y: UIScreen.main.bounds.height)
     }
     
     func createPresenterSnapshot(isPresentationStart: Bool) {
@@ -194,12 +117,12 @@ class PresentationController: UIPresentationController, SnapshotContaining {
 
         if container is UIViewController {
             
-            containerView.insertSubview(snapshot, aboveSubview: dimmingView)
+            containerView.insertSubview(snapshot, belowSubview: dimmingView)
             superview = containerView
             
         } else if let controller = presenter.presentationController as? PresentationController, let snapshot = controller.presenterSnapshot {
             
-            controller.containerView?.insertSubview(snapshot, aboveSubview: controller.dimmingView)
+            controller.containerView?.insertSubview(snapshot, belowSubview: controller.dimmingView)
             superview = controller.containerView
         }
         
@@ -220,6 +143,11 @@ class PresentationController: UIPresentationController, SnapshotContaining {
             } else {
                 snapshot.transform = self.transform(for: presenter, completed: true)
             }
+        }
+        
+        if let container = presentedViewController as? RequiresPresenterSnapshot {
+            
+            container.snapshotImageView?.image = presenter.view.asImage
         }
     }
     
@@ -242,7 +170,6 @@ class PresentationController: UIPresentationController, SnapshotContaining {
         }
         
         createPresenterSnapshot(isPresentationStart: true)
-        createEdgeSnapshots(forStart: true)
         
         guard let coordinator = presentedViewController.transitionCoordinator else {
             
@@ -300,9 +227,6 @@ class PresentationController: UIPresentationController, SnapshotContaining {
             
             self.dimmingView.alpha = 1.0
             self.dimmingView.frame.size.height = self.statusBarHeight + DrawerConstants.cornerRadius + 10
-            self.leftSnapshot?.transform = .identity
-            self.rightSnapshot?.transform = .identity
-            self.lowerSnapshot?.transform = .identity
             
             (self.presentedViewController as? ViewControllerOperationAttaching)?.complementaryPresentationAnimation()
             
@@ -314,20 +238,11 @@ class PresentationController: UIPresentationController, SnapshotContaining {
                     
                     self.snapshotContainer?.presenterSnapshot?.layer.transform = self.transform3D(for: presenter, completed: true)
                     self.grandPresenterSnapshot?.layer.transform = self.transform3D(for: self.grandPresenter, completed: true).concatenating(.translation(x: 0, y: self.grandParentYTranslation, z: 1.00001))
-                    
-                    (presenter.presentationController as? PresentationController)?.leftSnapshot?.layer.transform = CATransform3D.scale(x: 1, y: 0.5, z: 1.00001).concatenating(.translation(x: 100, y: 1, z: 1.00001))//self.transform3D(for: presenter, completed: true)
-                    (self.grandPresenter?.presentationController as? PresentationController)?.leftSnapshot?.layer.transform = CATransform3D.scale(x: 1, y: 0.5, z: 1.00001).concatenating(.translation(x: 100, y: 1, z: 1.00001))
-                    
-                    (presenter.presentationController as? PresentationController)?.rightSnapshot?.layer.transform = CATransform3D.scale(x: 1, y: 0.5, z: 1.00001).concatenating(.translation(x: -100, y: 1, z: 1.00001))//self.transform3D(for: presenter, completed: true)
-                    (self.grandPresenter?.presentationController as? PresentationController)?.rightSnapshot?.layer.transform = CATransform3D.scale(x: 1, y: 0.5, z: 1.00001).concatenating(.translation(x: -100, y: 1, z: 1.00001))
                 
                 } else {
                     
                     self.snapshotContainer?.presenterSnapshot?.transform = self.transform(for: presenter, completed: true)
                     self.grandPresenterSnapshot?.transform = self.transform(for: self.grandPresenter, completed: true).translatedBy(x: 0, y: self.grandParentYTranslation)
-                    
-                    (presenter.presentationController as? PresentationController)?.leftSnapshot?.transform = self.transform(for: presenter, completed: true)
-                    (self.grandPresenter?.presentationController as? PresentationController)?.leftSnapshot?.transform = self.transform(for: self.grandPresenter, completed: true).translatedBy(x: 0, y: self.grandParentYTranslation)
                 }
             }
         })
@@ -342,26 +257,17 @@ class PresentationController: UIPresentationController, SnapshotContaining {
             DrawerConstants.numberOfControllers += 1
         }
         
-//        createPresenterSnapshot(isPresentationStart: false)
+        createPresenterSnapshot(isPresentationStart: false)
         
         if use3DTransforms {
         
             snapshotContainer?.presenterSnapshot?.layer.transform = transform3D(for: presenter, completed: true)
             grandPresenterSnapshot?.layer.transform = transform3D(for: grandPresenter, completed: true).concatenating(.translation(x: 0, y: completed ? grandParentYTranslation : 0, z: 0))
             
-            (presenter.presentationController as? PresentationController)?.leftSnapshot?.layer.transform = CATransform3D.scale(x: 1, y: 0.5, z: 1.00001).concatenating(.translation(x: 100, y: 1, z: 0))
-            (grandPresenter?.presentationController as? PresentationController)?.leftSnapshot?.layer.transform = CATransform3D.scale(x: 1, y: 0.5, z: 1.00001).concatenating(.translation(x: 100, y: 1, z: 0))
-            
-            (presenter.presentationController as? PresentationController)?.rightSnapshot?.layer.transform = CATransform3D.scale(x: 1, y: 0.5, z: 1.00001).concatenating(.translation(x: -100, y: 1, z: 1.00001))
-            (grandPresenter?.presentationController as? PresentationController)?.rightSnapshot?.layer.transform = CATransform3D.scale(x: 1, y: 0.5, z: 1.00001).concatenating(.translation(x: -100, y: 1, z: 0))
-            
         } else {
             
             snapshotContainer?.presenterSnapshot?.transform = transform(for: presenter, completed: completed)
             grandPresenterSnapshot?.transform = transform(for: grandPresenter, completed: true).translatedBy(x: 0, y: completed ? grandParentYTranslation : 0)
-            
-            (presenter.presentationController as? PresentationController)?.leftSnapshot?.transform = transform(for: presenter, completed: completed)
-            (grandPresenter?.presentationController as? PresentationController)?.leftSnapshot?.transform = transform(for: grandPresenter, completed: true).translatedBy(x: 0, y: completed ? grandParentYTranslation : 0)
         }
         
         if presenter is ViewController {
@@ -406,26 +312,14 @@ class PresentationController: UIPresentationController, SnapshotContaining {
             
                 self.snapshotContainer?.presenterSnapshot?.layer.transform = .identity
                 self.grandPresenterSnapshot?.layer.transform = self.transform3D(for: self.grandPresenter, completed: true)
-                
-                (self.presenter?.presentationController as? PresentationController)?.leftSnapshot?.layer.transform = .identity
-                (self.grandPresenter?.presentationController as? PresentationController)?.leftSnapshot?.layer.transform = CATransform3D.scale(x: 1, y: 0.5, z: 1.00001).concatenating(.translation(x: 100, y: 1, z: 0))
-                
-                (self.presenter?.presentationController as? PresentationController)?.rightSnapshot?.layer.transform = .identity
-                (self.grandPresenter?.presentationController as? PresentationController)?.rightSnapshot?.layer.transform = CATransform3D.scale(x: 1, y: 0.5, z: 1.00001).concatenating(.translation(x: -100, y: 1, z: 0))
             
             } else {
                 
                 self.snapshotContainer?.presenterSnapshot?.transform = .identity
                 self.grandPresenterSnapshot?.transform = self.transform(for: self.grandPresenter, completed: true)
-                
-                (self.presenter?.presentationController as? PresentationController)?.leftSnapshot?.transform = .identity
-                (self.grandPresenter?.presentationController as? PresentationController)?.leftSnapshot?.transform = self.transform(for: self.grandPresenter, completed: true)
             }
             
             dimmingView.isHidden = true
-            leftSnapshot?.isHidden = true
-            rightSnapshot?.isHidden = true
-            lowerSnapshot?.isHidden = true
             
             return
         }
@@ -470,9 +364,6 @@ class PresentationController: UIPresentationController, SnapshotContaining {
                     
                     self.snapshotContainer?.presenterSnapshot?.transform = .identity
                     self.grandPresenterSnapshot?.transform = self.transform(for: self.grandPresenter, completed: true)
-                    
-                    (self.presenter?.presentationController as? PresentationController)?.leftSnapshot?.transform = .identity
-                    (self.grandPresenter?.presentationController as? PresentationController)?.leftSnapshot?.transform = self.transform(for: self.grandPresenter, completed: true)
                 }
             }
         })
@@ -522,19 +413,10 @@ class PresentationController: UIPresentationController, SnapshotContaining {
                 snapshotContainer?.presenterSnapshot?.layer.transform = completed ? .identity : transform3D(for: presenter, completed: true)
                 self.grandPresenterSnapshot?.layer.transform = transform3D(for: grandPresenter, completed: true).concatenating(.translation(x: 0, y: completed ? 0 : grandParentYTranslation, z: 1.00001))
                 
-                (presenter.presentationController as? PresentationController)?.leftSnapshot?.layer.transform = completed ? .identity : CATransform3D.scale(x: 1, y: 0.5, z: 1.00001).concatenating(.translation(x: 100, y: 1, z: 0))
-                (grandPresenter?.presentationController as? PresentationController)?.leftSnapshot?.layer.transform = CATransform3D.scale(x: 1, y: 0.5, z: 1.00001).concatenating(.translation(x: 100, y: 1, z: 0))
-                
-                (self.presenter?.presentationController as? PresentationController)?.rightSnapshot?.layer.transform = completed ? .identity : CATransform3D.scale(x: 1, y: 0.5, z: 1.00001).concatenating(.translation(x: -100, y: 1, z: 0))
-                (self.grandPresenter?.presentationController as? PresentationController)?.rightSnapshot?.layer.transform = CATransform3D.scale(x: 1, y: 0.5, z: 1.00001).concatenating(.translation(x: -100, y: 1, z: 0))
-                
             } else {
                 
                 snapshotContainer?.presenterSnapshot?.transform = completed ? .identity : transform(for: presenter, completed: true)
                 self.grandPresenterSnapshot?.transform = transform(for: grandPresenter, completed: true).translatedBy(x: 0, y: completed ? 0 : grandParentYTranslation)
-                
-                (presenter.presentationController as? PresentationController)?.leftSnapshot?.transform = completed ? .identity : transform(for: presenter, completed: true)
-                (grandPresenter?.presentationController as? PresentationController)?.leftSnapshot?.transform = transform(for: grandPresenter, completed: true).translatedBy(x: 0, y: completed ? 0 : grandParentYTranslation)
             }
         }
         
@@ -737,21 +619,10 @@ extension PresentationController {
         }
     }
     
-    func hideSnapshots() {
-        
-        self.leftSnapshot?.isHidden = true
-        self.rightSnapshot?.isHidden = true
-        self.lowerSnapshot?.isHidden = true
-    }
-    
     func performInitialCoordinatorAnimations() {
         
         self.dimmingView.alpha = 0.0
         self.dimmingView.frame.size.height = self.containerView?.bounds.height ?? UIScreen.main.bounds.height
-        
-        self.leftSnapshot?.transform = .init(translationX: 0, y: UIScreen.main.bounds.height)
-        self.rightSnapshot?.transform = .init(translationX: 0, y: UIScreen.main.bounds.height)
-        self.lowerSnapshot?.transform = .init(translationX: 0, y: self.lowerSnapshot?.frame.size.height ?? 0)
         
         (self.presentedViewController as? ScrollViewDismissable)?.complementaryDismissalAnimation()
     }
@@ -760,12 +631,6 @@ extension PresentationController {
         
         snapshotContainer?.presenterSnapshot?.layer.transform = .identity
         self.grandPresenterSnapshot?.layer.transform = self.transform3D(for: self.grandPresenter, completed: true)
-        
-        (self.presenter?.presentationController as? PresentationController)?.leftSnapshot?.layer.transform = .identity
-        (self.grandPresenter?.presentationController as? PresentationController)?.leftSnapshot?.layer.transform = CATransform3D.scale(x: 1, y: 0.5, z: 1.00001).concatenating(.translation(x: 100, y: 1, z: 0))
-        
-        (self.presenter?.presentationController as? PresentationController)?.rightSnapshot?.layer.transform = .identity
-        (self.grandPresenter?.presentationController as? PresentationController)?.rightSnapshot?.layer.transform = CATransform3D.scale(x: 1, y: 0.5, z: 1.00001).concatenating(.translation(x: -100, y: 1, z: 0))
     }
     
     func performPreiOS11CoordinatorAnimations(with coordinator: UIViewControllerTransitionCoordinator) {
@@ -792,58 +657,6 @@ extension PresentationController {
             } else {
                 
                 self.grandPresenterSnapshot?.transform = self.transform(for: self.grandPresenter, completed: true)
-            }
-            
-        }, completion: nil)
-        
-        coordinator.animateAlongsideTransition(in: (self.presenter?.presentationController as? PresentationController)?.leftSnapshot, animation: { _ in
-            
-            if use3DTransforms {
-                
-                (self.presenter?.presentationController as? PresentationController)?.leftSnapshot?.layer.transform = .identity
-                
-            } else {
-                
-                // Unused
-            }
-            
-        }, completion: nil)
-        
-        coordinator.animateAlongsideTransition(in: (self.grandPresenter?.presentationController as? PresentationController)?.leftSnapshot, animation: { _ in
-            
-            if use3DTransforms {
-                
-                (self.grandPresenter?.presentationController as? PresentationController)?.leftSnapshot?.layer.transform = CATransform3D.scale(x: 1, y: 0.5, z: 1.00001).concatenating(.translation(x: 100, y: 1, z: 0))
-                
-            } else {
-                
-                // Unused
-            }
-            
-        }, completion: nil)
-        
-        coordinator.animateAlongsideTransition(in: (self.presenter?.presentationController as? PresentationController)?.rightSnapshot, animation: { _ in
-            
-            if use3DTransforms {
-                
-                (self.presenter?.presentationController as? PresentationController)?.rightSnapshot?.layer.transform = .identity
-                
-            } else {
-                
-                // Unused
-            }
-            
-        }, completion: nil)
-        
-        coordinator.animateAlongsideTransition(in: (self.grandPresenter?.presentationController as? PresentationController)?.rightSnapshot, animation: { _ in
-            
-            if use3DTransforms {
-                
-                (self.grandPresenter?.presentationController as? PresentationController)?.rightSnapshot?.layer.transform = CATransform3D.scale(x: 1, y: 0.5, z: 1.00001).concatenating(.translation(x: -100, y: 1, z: 0))
-                
-            } else {
-                
-                // Unused
             }
             
         }, completion: nil)
@@ -908,21 +721,29 @@ extension Optional {
 
 extension UIView {
     
-    func createCutout(of frame: CGRect) {
+    func createCutout(of frame: CGRect, radius: CGFloat = 0) {
         
         let maskLayer = CAShapeLayer()
         maskLayer.frame = bounds
         maskLayer.fillColor = UIColor.black.cgColor
-
+        
         // Create the path.
         let path = UIBezierPath(rect: bounds)
         maskLayer.fillRule = .evenOdd
-
+        
         // Append the overlay image to the path so that it is subtracted.
-        path.append(UIBezierPath(rect: frame))
+        path.append(UIBezierPath.init(roundedRect: frame, cornerRadius: radius))
         maskLayer.path = path.cgPath
         
         // Set the mask of the view.
         layer.mask = maskLayer
+    }
+    
+    var asImage: UIImage? {
+        
+        UIGraphicsBeginImageContextWithOptions(bounds.size, isOpaque, 0.0)
+        defer { UIGraphicsEndImageContext() }
+        drawHierarchy(in: bounds, afterScreenUpdates: true)
+        return UIGraphicsGetImageFromCurrentImageContext()
     }
 }

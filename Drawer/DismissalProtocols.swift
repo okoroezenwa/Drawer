@@ -56,7 +56,11 @@ protocol ScrollViewDismissable: ViewControllerOperationAttaching {
     func gesturesToBeRecognised(with gr: UIGestureRecognizer) -> Set<UIGestureRecognizer>
     
     /// The animation to use for the presentation and/or dismissal of the presented view controller. If `nil`, the standard bottom-up slide animation is used.
-    func animation(for controller: UIViewController, at state: PresentationAnimator.State) -> (() -> ())?
+    func animation(for controller: UIViewController, at state: PresentationAnimator.State, finalFrame: CGRect) -> (() -> ())?
+    
+    func preparation(for controller: UIViewController, at state: PresentationAnimator.State)
+    
+//    func completion(for controller: UIViewController, completed: Bool)
 }
 
 protocol StatusBarControlling: AnyObject {
@@ -97,29 +101,21 @@ extension ViewControllerOperationAttaching {
 // Default implementations of a few of the protocol properties and methods
 extension ScrollViewDismissable {
     
-    var presentationAnimation: (() -> ())? {
-        
-        nil
-    }
+    var presentationAnimation: (() -> ())? { nil }
     
     var isPresentedFullScreen: Bool { false }
     
-    var refreshControl: UIRefreshControl? {
-        
-        nil
-    }
+    var refreshControl: UIRefreshControl? { nil }
     
     var shouldUseBackingSnapshots: Bool { false }
     
-    func animation(for controller: UIViewController, at state: PresentationAnimator.State) -> (() -> ())? {
-        
-        nil
-    }
+    func preparation(for controller: UIViewController, at state: PresentationAnimator.State) {  }
     
-    func scrollDirectionMatchesDismissal(via gr: UIPanGestureRecognizer) -> Bool {
-        
-        gr.translation(in: gr.view).y > 0
-    }
+//    func completion(for controller: UIViewController, completed: Bool) {  }
+    
+    func animation(for controller: UIViewController, at state: PresentationAnimator.State, finalFrame: CGRect) -> (() -> ())? { nil }
+    
+    func scrollDirectionMatchesDismissal(via gr: UIPanGestureRecognizer) -> Bool { gr.translation(in: gr.view).y > 0 }
     
     func canBeginDismissal(with gr: UIPanGestureRecognizer) -> Bool {
         
@@ -136,15 +132,9 @@ extension ScrollViewDismissable {
         return true
     }
     
-    func allowRecognition(of gr: UIGestureRecognizer) -> Bool {
-        
-        true
-    }
+    func allowRecognition(of gr: UIGestureRecognizer) -> Bool { true }
     
-    func gesturesToBeRecognised(with gr: UIGestureRecognizer) -> Set<UIGestureRecognizer> {
-        
-        []
-    }
+    func gesturesToBeRecognised(with gr: UIGestureRecognizer) -> Set<UIGestureRecognizer> { [] }
 }
 
 extension ViewControllerOperationAttaching {
@@ -162,3 +152,8 @@ protocol SnapshotContaining: AnyObject {
 }
 
 protocol ViewController: SnapshotContaining {  }
+
+protocol RequiresPresenterSnapshot: AnyObject {
+    
+    var snapshotImageView: UIImageView? { get set }
+}
