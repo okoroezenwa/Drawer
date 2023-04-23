@@ -293,10 +293,14 @@ class PresentationController: UIPresentationController, SnapshotContaining {
         (presentedViewController as? ViewControllerOperationAttaching)?.dismissalPreparation()
         (presenter as? ViewControllerOperationAttaching)?.dismissalPreparation()
         
-        // apparently the `animateTransition` method in the animation controller is not called when a transition is not animated, thus the presented subview is simply removed here.
+        // apparently the `animateTransition` method in the animation controller is not called when a transition is not animated, thus the presented subview is simply removed here. Also the presenter is added back into the view heirarchy
         if !coordinator.isAnimated {
             
             presentedView?.removeFromSuperview()
+            
+            if let presenter {
+                presenterSuperview?.addSubview(presenter.view)
+            }
             
             if presenter is ViewController || (presenter as? ScrollViewDismissable)?.isPresentedFullScreen == true {
                   
